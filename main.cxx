@@ -36,6 +36,9 @@
 //Needed for reading in vector types from root files.
 #include <TInterpreter.h>
 
+#include "includes/Trigger.h"
+#include "includes/LMSTrig.h"
+
 
 using namespace std;
 
@@ -90,6 +93,7 @@ static void printUsage(const char *prog)
               << "\t-R Evaluates for trigger efficiencies from events with random trigger\n"
               << "\t-f <filename> of the .root file to evaluate for the various trigger efficiencies\n"
               << "\t-L <fileList.txt> of the .root files to evaluate. Use if wanting to process multiple files. Follow the format in the README\n"
+              << "\t-e Evaluates this trigger's performance with respect to itself. Only checks for internal performance on fired events."
               << "\t-h Show this help\n"
               << "\tNOTE: Either option -f or -L are REQUIRED for running properly.";
 }
@@ -110,6 +114,7 @@ int main (int argc, char **argv){
     bool vtp_clust = false;
     bool comp_TotalSum = false;
     bool rand = false;
+    bool self = false;
 
     string fileName;
     string fileListFileName;
@@ -122,7 +127,7 @@ int main (int argc, char **argv){
 
     // ── Parse command-line ───────────────────────────────────────────────
     int opt;
-    while ((opt = getopt(argc, argv, "alspmchf:rL:")) != -1) {
+    while ((opt = getopt(argc, argv, "alspmchf:rL:e")) != -1) {
         switch (opt) {
             case 'a': all=true; Lms =true; sum=true; alpha=true; mOR=true; vtp_clust = true; break;
             case 'l': Lms = true; break;
@@ -134,6 +139,7 @@ int main (int argc, char **argv){
             case 'R': rand = true; break;
             case 'f': fileName = optarg; break;
             case 'L': fileListFileName = optarg; break;
+            case 'e': self = true; break;
             case 'h':
             default: printUsage(argv[0]); return (opt == 'h') ? 0 : 1;
         }
@@ -170,7 +176,9 @@ int main (int argc, char **argv){
     TChain* fChain = makeChain(fileNameVec);
 
     if(Lms){
-        
+        LMSTrig trig1 = LMSTrig(fChain);
+
+        trig1.ProcessData(self, rand, sum);
     }
 
     return 0;
