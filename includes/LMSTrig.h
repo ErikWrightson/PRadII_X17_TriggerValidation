@@ -50,12 +50,19 @@ class LMSTrig: public Trigger{
         static const Int_t RAND_FLAG = 0x01000000;
 
         //Constuctor that ensures the chain is set up via the parent constructor.
-        LMSTrig(TChain* c):Trigger(c);
+        LMSTrig(TChain* c);
 
         //Processing Function inhereted from parent.
-        void ProcessData(bool self, bool rand, bool tSum) overide;
+        void ProcessData(bool self, bool rand, bool tSum) override;
+
+    private:
+        Double_t rand_LMS_Elligible;
+        Double_t rand_LMS_Found;
+
+        Double_t tSum_LMS_Elligible;
+        Double_t tSum_LMS_Found;
 
 
-}
+};
 
 #endif

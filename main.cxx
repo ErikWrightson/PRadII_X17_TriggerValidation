@@ -11,15 +11,76 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fstream>
-#include "includes/util/FileProcessUtil.h"
+
+
+//ROOT Includes that may be handy to have.
+#include <TROOT.h>
+#include <TChain.h>
+#include <TFile.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TObject.h>
+#include <TGraphAsymmErrors.h>
+#include <TGraphErrors.h>
+#include <TTree.h>
+#include <TLeaf.h>
+#include <TFitResult.h>
+#include <TH1.h>
+#include <TH1F.h>
+#include <TH2.h>
+#include <TF1.h>
+#include <TLegend.h>
+#include <TMath.h>
+#include <TColor.h>
+#include <TString.h>
+//Needed for reading in vector types from root files.
+#include <TInterpreter.h>
+
 
 using namespace std;
-using namespace FileProcessUtil;
 
+/**
+ * Processes the file with the input file name and reads out the root file names contained within and adds them to a vector.
+ *
+ * @param fileListFileName - the name of the file with the list of ROOT file names.
+ */
+vector<TString> processFileList(string fileListFileName){
+        ifstream file(fileListFileName);
+        string line;
+        
+        vector<TString> list;
+        while(getline(file,line)){
+            TString l(line);
+            list.push_back(l);
+        }
+
+        return list;
+}
+
+/**
+ * Makes a TChain of the entries in a TString vector assuming they are valid paths to ROOT files.
+ *
+ * @param names - the vector of ROOT file names to be linked in the chain.
+ */
+TChain* makeChain(vector<TString> names){
+        TChain* chain = new TChain("T");
+        for(unsigned int i = 0; i < names.size(); i++){
+            chain->Add(names.at(i));
+        }
+
+        return chain;
+}
+
+
+/**
+ * Prints out the proper usage directions for this program and what each flag means.
+ *
+ * @param prog - the progam name that is being currently run.
+ */
 static void printUsage(const char *prog)
 {
     cerr << "Usage: " << prog << " [options]\n"
-              << "\t-a Evaluates for all trigger type efficiencies\n";
+              << "\t-a Evaluates for all trigger type efficiencies\n"
               << "\t-l Evaluates for LMS Trigger efficiency\n"
               << "\t-s Evaluates for the Total Sum Trigger efficiency\n"
               << "\t-p Evaluates for the Alpha Source Trigger efficiency\n"
@@ -33,6 +94,12 @@ static void printUsage(const char *prog)
               << "\tNOTE: Either option -f or -L are REQUIRED for running properly.";
 }
 
+/**
+ * The main function that launches the trigger analysis.
+ *
+ * @param argc - the number of input arguments
+ * @param argv - an array of the different arguments as an array of char* (strings).
+ */
 int main (int argc, char **argv){
 
     bool all = false;
@@ -44,7 +111,7 @@ int main (int argc, char **argv){
     bool comp_TotalSum = false;
     bool rand = false;
 
-    TString fileName;
+    string fileName;
     string fileListFileName;
 
 	if (argc<1) {
@@ -57,11 +124,11 @@ int main (int argc, char **argv){
     int opt;
     while ((opt = getopt(argc, argv, "alspmchf:rL:")) != -1) {
         switch (opt) {
-            case 'a': all=true; Lms =true; sum=true; alpha=true; mOr=true; vtp_clust = true; break;
+            case 'a': all=true; Lms =true; sum=true; alpha=true; mOR=true; vtp_clust = true; break;
             case 'l': Lms = true; break;
             case 's': sum = true; break;
             case 'p': alpha = true; break;
-            case 'm': mOr = true; break;
+            case 'm': mOR = true; break;
             case 'c': vtp_clust = true; break;
             case 'T': comp_TotalSum = true; break;
             case 'R': rand = true; break;
@@ -81,12 +148,12 @@ int main (int argc, char **argv){
         return -3;
     }
 
-    vector<TString> fileVec;
+    vector<TString> fileNameVec;
     if(existList){
-        fileNameVec = processFileList();
+        fileNameVec = processFileList(fileListFileName);
     }
     if(existOne){
-        fileNameVec.push_back(fileName);
+        fileNameVec.push_back((TString) fileName);
     }
 
     if(!(comp_TotalSum || rand || vtp_clust)){

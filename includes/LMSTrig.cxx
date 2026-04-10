@@ -13,8 +13,13 @@
  *
  * @param c - the TChain of events to
  */
-LMSTrig::LMSTrig(TChain* c):Trigger(c){
+LMSTrig::LMSTrig(TChain* c):Trigger(c, false){
     cout<<"Set All Branch Addresses for LMS Trigger Object.\n";
+    rand_LMS_Elligible = 0;
+    rand_LMS_Found = 0;
+
+    tSum_LMS_Elligible = 0;
+    tSum_LMS_Found = 0;
 }
 
 /**
@@ -26,20 +31,41 @@ LMSTrig::LMSTrig(TChain* c):Trigger(c){
  * @param rand - Whether or not this trigger should have evalutaion done using a random trigger source. {True for Yes; False for No}
  * @param tSum - Whether or not this trigger should have evaluation done using total sum trigger source. {True for Yes; False for No}
  */
-void LMSTrig::ProcessData(bool self, bool rand, bool tSum) override{
+void LMSTrig::ProcessData(bool self, bool rand, bool tSum){
     //Get the amount of entries from each file to limit looping through them.
 	Long64_t entries = chain->GetEntries();
+
+    rand_LMS_Elligible = 0;
+    rand_LMS_Found = 0;
+
+    tSum_LMS_Elligible = 0;
+    tSum_LMS_Found = 0;
     
     for(Int_t i = 0; i < entries; i++){
         chain->GetEntry(i);
 
-        if(self){
+        if(self && (trigType & EXT_FLAG) && (trigger & LMS_FLAG)){
 
         }
-        if(rand){
+        if(rand && (trigType & EXT_FLAG) && (trigger & RAND_FC_FLAG)){
 
         }
-        if(tSum){
+        if(tSum && (trigType & SD_FLAG) && (trigger & TSUM_FLAG)){
+            Int_t crysFire = 0;
+            Int_t LMS_RefFire = 0;
+
+            for(int x = 0; x < numChan; x++){
+                //Checks that all 3 LMS Reference PMT Channels fired and that at least 3 crystals fired.
+                //Technically all should fire, but limiting to three allows for the least amount of channels to be checked.
+                if(crysFire >= 3 && LMS_RefFire >= 3){
+                    tSum_LMS_Elligible++;
+                    if((trigType & EXT_FLAG) && (trigger & LMS_FLAG)){tSum_LMS_Found++;}
+                    break;
+                }
+
+                if(crysFire && modId[x] > 1000 && modId[x]<3000){crysFire++;}
+                if(modId[x] > 3000 && modId[x]<4000){LMS_RefFire++;}
+            }
 
         }
     }

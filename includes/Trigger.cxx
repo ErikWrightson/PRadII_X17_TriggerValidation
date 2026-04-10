@@ -11,8 +11,9 @@
  * Creates a trigger object and then sets the known branches that are in the PRadII/X17 level 1 replay trees.
  *
  * @param c - the TChain to set up the branching and trees for.
+ * @param gem - boolean flag for if any GEM information is needed for this trigger.
  */
-Trigger::Trigger(TChain* c){
+Trigger::Trigger(TChain* c, bool gem){
     chain = (TChain*) c;
 
     chain->SetMakeClass(1);
@@ -44,7 +45,7 @@ Trigger::Trigger(TChain* c){
     }
     
     //GEM Information
-    if(chain->GetBranch("gem.nch")){
+    if(gem && chain->GetBranch("gem.nch")){
         chain->Branch("gem.nch",          gem_numChan);
         chain->Branch("gem.mpd_crate",    mpdCrate);
         chain->Branch("gem.mpd_fiber",    mpdFiber);
@@ -64,6 +65,6 @@ Trigger::Trigger(TChain* c){
  * @param rand - Whether or not this trigger should have evalutaion done using a random trigger source. {True for Yes; False for No}
  * @param tSum - Whether or not this trigger should have evaluation done using total sum trigger source. {True for Yes; False for No}
  */
-virtual void Trigger::ProcessData(bool self, bool rand, bool tSum){
+void Trigger::ProcessData(bool self, bool rand, bool tSum){
     cout<<"This should be overriden by all child classes.";
 }

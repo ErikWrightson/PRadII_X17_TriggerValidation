@@ -28,6 +28,6 @@ main.o: $(ANA_H) main.cxx
 
 TrigVal:		main.o $(ANA_O) $(ANAc_O) $(ANAC_O)
 	@echo "Link Fit"
-	@echo g++ $(FLAGS) -I $(ROOTINC) -I includes/ -o TrigVal $(ANA_O) $(ANAc_O) $(ANAC_O) main.o $(ROOTLIB) -lGenVector -lsqlite3
+	@echo g++ $(FLAGS) -I $(ROOTINC) -I includes/ -o TrigVal $(ANA_O) $(ANAc_O) $(ANAC_O) main.o $(ROOTLIB) -lGenVector -lsqlite3 -L includes/util/FileProcessUtil.cxx
 	@g++ $(FLAGS) -I $(ROOTINC) -I includes/ -o TrigVal $(ANA_O) $(ANAc_O) $(ANAC_O) main.o  $(ROOTLIB) -lGenVector -lsqlite3
 	@echo "Compilation Done"
