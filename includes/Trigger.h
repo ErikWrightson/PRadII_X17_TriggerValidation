@@ -47,24 +47,28 @@ class Trigger{
 
     public:
 
-        //Statically set the flags for each trigger type.
-        static constexpr Int_t EXT_FLAG = 0x0FF0000;     // External trigger type flag
-        static constexpr Int_t SD_FLAG = 0x0000000;      //SD trigger type flag
-        static constexpr Int_t LMS_FLAG = 0x01000000;    // LMS LED pulse trigger flag
-
-        //The rest of these flags are currently placeholder.
-        static constexpr Int_t ALPHA_FLAG = 0x00000000;  // LMS Alpha pulse flag
-
+        //Trigger Type Flags
+        static constexpr UInt_t SSP_RAWSUM_TFLAG = 8; // SSP Raw Sum trigger type flag
+        static constexpr UInt_t CLUSTER_TFLAG = 9;    //Clustering trigger type flag
+        static constexpr UInt_t PULSER_TFLAG = 15;    //Pulser trigger type flag
+        static constexpr UInt_t LMS_TFLAG = 24;       //LMS trigger type flag
+        static constexpr UInt_t ALPHA_TFLAG = 25;     //Alpha trigger type flag
+        static constexpr UInt_t MOR_TFLAG = 27;       //Master OR trigger type flag
+        
+        //Trigger Bits Flags
+        static constexpr UInt_t TSUM_FLAG = 8; //Total Sum Bit flag
         //VTP Clustering Trigger Flags
-        static constexpr Int_t VTPCL1_FLAG = 0x0000000;  // Single Cluster trigger flag
-        static constexpr Int_t VTPCL2_FLAG = 0x0000000;  // Two Cluster trigger flag
-        static constexpr Int_t VTPCL3_FLAG = 0x0000000;  // Three Cluster trigger flag
+        static constexpr UInt_t CL1_FLAG = 9;  // Single Cluster trigger flag
+        static constexpr UInt_t CL2_FLAG = 10;  // Two Cluster trigger flag
+        static constexpr UInt_t CL3_FLAG = 11;  // Three Cluster trigger flag
+        static constexpr UInt_t PULSER_FLAG = 15; // Pulser flag
+        static constexpr UInt_t LMS_FLAG = 24;    // LMS LED pulse trigger flag
+        static constexpr UInt_t ALPHA_FLAG = 25;  // LMS Alpha pulse flag
+        static constexpr UInt_t RAND_FC_FLAG = 26;    // Random Trigger from the Faraday Cup flag
+        static constexpr UInt_t MOR_FLAG = 27;
+        
 
-        //Comparison Trigger Flags
-        static constexpr Int_t PULSER_FLAG = 0x00000000; // Pulser flag
-        static constexpr Int_t RAND_FC_FLAG = 0x0000000;    // Random Trigger from the Faraday Cup flag
-        static constexpr Int_t TSUM_FLAG = 0x0000000;
-
+        //Limits for arrays.
         static constexpr Int_t MAX_SAMPLES  = 200;       // samples per channel per event
         static constexpr Int_t MAX_CHANNELS = 64;        // channels per slot (16 for FADC250, 64 for ADC1881M)
         static constexpr Int_t MAX_ROCS     = 10;        // number of ROC crates

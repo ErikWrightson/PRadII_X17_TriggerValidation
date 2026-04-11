@@ -55,6 +55,7 @@ class LMSTrig: public Trigger{
         //Processing Function inhereted from parent.
         void ProcessData(bool self, bool rand, bool tSum) override;
 
+        //Getter methods
         Double_t get_Rand_LMS_Elligible();
         Double_t get_Rand_LMS_Found();
         Double_t get_tSum_LMS_Elligible();

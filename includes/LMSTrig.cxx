@@ -70,3 +70,9 @@ void LMSTrig::ProcessData(bool self, bool rand, bool tSum){
         }
     }
 }
+
+//Getter methods
+Double_t LMSTrig::get_Rand_LMS_Elligible(){return rand_LMS_Elligible;}
+Double_t LMSTrig::get_Rand_LMS_Found(){return rand_LMS_Found;}
+Double_t LMSTrig::get_tSum_LMS_Elligible(){return tSum_LMS_Elligible;}
+Double_t LMSTrig::get_tSum_LMS_Found(){return tSum_LMS_Found;}
