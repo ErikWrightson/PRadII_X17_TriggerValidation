@@ -44,13 +44,13 @@ void LMSTrig::ProcessData(bool self, bool rand, bool tSum){
     for(Int_t i = 0; i < entries; i++){
         chain->GetEntry(i);
 
-        if(self && (trigType & EXT_FLAG) && (trigger & LMS_FLAG)){
+        if(self && (trigType & (1<<LMS_TFLAG)) && (trigger & LMS_FLAG)){
 
         }
-        if(rand && (trigType & EXT_FLAG) && (trigger & RAND_FC_FLAG)){
+        if(rand && (trigger_bits & (1<<RAND_FC_FLAG))){
 
         }
-        if(tSum && (trigType & SD_FLAG) && (trigger & TSUM_FLAG)){
+        if(tSum && (trigType & (1<<SSP_RAWSUM_TFLAG)) && (trigger_bits & (1<<TSUM_FLAG))){
             Int_t crysFire = 0;
             Int_t LMS_RefFire = 0;
 

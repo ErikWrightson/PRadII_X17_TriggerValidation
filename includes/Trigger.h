@@ -87,7 +87,7 @@ class Trigger{
         //Locations to store the event data
         UInt_t eventNum;
         UChar_t trigType;
-        UInt_t trigger;
+        UInt_t trigger_bits;
         Long64_t time;
 
         //Locations to store the HyCal data.
