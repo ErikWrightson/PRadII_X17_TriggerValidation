@@ -21,7 +21,7 @@ Trigger::Trigger(TChain* c, bool gem){
     //General Event Data
     chain->SetBranchAddress("event_num",       &eventNum);
     chain->SetBranchAddress("trigger_type",    &trigType);
-    chain->SetBranchAddress("trigger_bits",         &trigger_bits);
+    chain->SetBranchAddress("trigger_bits",    &trigger_bits);
     chain->SetBranchAddress("timestamp",       &time);
 
     //HyCal Information
