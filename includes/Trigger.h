@@ -81,7 +81,9 @@ class Trigger{
         static constexpr Int_t MAX_HC_CHANS = 1728;      //Maximum number of HyCal Channels that could fire.
         static constexpr Int_t MAX_GEM_CHANS = 1000;     //Maximum GEM channels that could fire.
         static constexpr Int_t MAX_NUM_SSP_TRIGS = 1000; //Maximum number of SSP triggers that could fire.
-
+        static constexpr Int_t MAX_LMS_CHANS = 3;        //Maximum number of LMS Channels that could fire.
+        static constexpr Int_t MAX_VETO_CHANS = 4;       //Maximum number of Veto Scintillator Channels that could fire.
+        
         TChain* chain;
 
         //Locations to store the event data
@@ -117,6 +119,42 @@ class Trigger{
         Short_t sspSamp[MAX_GEM_CHANS][SSP_TIME_SAMPLES];
         Int_t numSSPTrigs;
         UInt_t sspTrigTags[MAX_NUM_SSP_TRIGS][SSP_TIME_SAMPLES];
+
+        //Locations to store the LMS data.
+        Int_t lms_numChan;
+        UChar_t lms_crate[MAX_LMS_CHANS];
+        UChar_t lms_slot[MAX_LMS_CHANS];
+        UChar_t lms_channel[MAX_LMS_CHANS];
+        UShort_t lms_modId[MAX_LMS_CHANS];
+        UChar_t lms_nSamps[MAX_LMS_CHANS];
+        UShort_t lms_samps[MAX_LMS_CHANS][MAX_SAMPLES];
+        Float_t lms_pedMean[MAX_LMS_CHANS];
+        Float_t lms_pedRMS[MAX_LMS_CHANS];
+        Float_t lms_integral[MAX_LMS_CHANS];
+
+        //Only sometimes used for storing the LMS waveform information.
+        UChar_t lms_nPeaks[MAX_LMS_CHANS];
+        Float_t lms_peakHeight[MAX_LMS_CHANS][MAX_PEAKS];
+        Float_t lms_peakTime[MAX_LMS_CHANS][MAX_PEAKS];
+        Float_t lms_peakIntegral[MAX_LMS_CHANS][MAX_PEAKS];
+
+        //Locations to store the Veto Scintillator data.
+        Int_t veto_numChan;
+        UChar_t veto_crate[MAX_VETO_CHANS];
+        UChar_t veto_slot[MAX_VETO_CHANS];
+        UChar_t veto_channel[MAX_VETO_CHANS];
+        UShort_t veto_modId[MAX_VETO_CHANS];
+        UChar_t veto_nSamps[MAX_VETO_CHANS];
+        UShort_t veto_samps[MAX_VETO_CHANS][MAX_SAMPLES];
+        Float_t veto_pedMean[MAX_VETO_CHANS];
+        Float_t veto_pedRMS[MAX_VETO_CHANS];
+        Float_t veto_integral[MAX_VETO_CHANS];
+
+        //Only sometimes used for storing the LMS waveform information.
+        UChar_t veto_nPeaks[MAX_VETO_CHANS];
+        Float_t veto_peakHeight[MAX_VETO_CHANS][MAX_PEAKS];
+        Float_t veto_peakTime[MAX_VETO_CHANS][MAX_PEAKS];
+        Float_t veto_peakIntegral[MAX_VETO_CHANS][MAX_PEAKS];
 
         //Parent Constructor
         Trigger(TChain* c, bool gem);

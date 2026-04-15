@@ -66,7 +66,7 @@ vector<TString> processFileList(string fileListFileName){
  * @param names - the vector of ROOT file names to be linked in the chain.
  */
 TChain* makeChain(vector<TString> names){
-        TChain* chain = new TChain("T");
+        TChain* chain = new TChain("events");
         for(unsigned int i = 0; i < names.size(); i++){
             chain->Add(names.at(i));
         }
@@ -95,7 +95,7 @@ static void printUsage(const char *prog)
               << "\t-L <fileList.txt> of the .root files to evaluate. Use if wanting to process multiple files. Follow the format in the README\n"
               << "\t-e Evaluates this trigger's performance with respect to itself. Only checks for internal performance on fired events."
               << "\t-h Show this help\n"
-              << "\tNOTE: Either option -f or -L are REQUIRED for running properly.";
+              << "\tNOTE: Either option -f or -L are REQUIRED for running properly.\n";
 }
 
 /**
@@ -119,15 +119,16 @@ int main (int argc, char **argv){
     string fileName;
     string fileListFileName;
 
-	if (argc<1) {
-		cout<<"ERR: Incorrect Arguments: "<<endl;
+	if (argc<2) {
+		cout<<"ERR: Incorrect Arguments: " <<endl;
+        printUsage(argv[0]);
 		
 		return -1;
 	}
 
     // ── Parse command-line ───────────────────────────────────────────────
     int opt;
-    while ((opt = getopt(argc, argv, "alspmchf:rL:e")) != -1) {
+    while ((opt = getopt(argc, argv, "alspmchTf:rL:e")) != -1) {
         switch (opt) {
             case 'a': all=true; Lms =true; sum=true; alpha=true; mOR=true; vtp_clust = true; break;
             case 'l': Lms = true; break;
@@ -150,7 +151,7 @@ int main (int argc, char **argv){
     bool existList = (stat(fileListFileName.c_str(), &buffer) == 0);
 
     if(!existOne && !existList){
-        cerr<<"A single valid input file or a filelist txt file was not provided.";
+        cerr<<"A single valid input file or a filelist txt file was not provided.\n";
         return -3;
     }
 
@@ -178,8 +179,22 @@ int main (int argc, char **argv){
     if(Lms){
         LMSTrig trig1 = LMSTrig(fChain);
 
-        trig1.ProcessData(self, rand, sum);
+        trig1.ProcessData(self, rand, comp_TotalSum);
+
+        if(comp_TotalSum){
+            Double_t lms_ts_f = trig1.get_tSum_LMS_Found();
+            Double_t lms_ts_e = trig1.get_tSum_LMS_Elligible();
+            Double_t lms_ts_eff = lms_ts_f/lms_ts_e * 100;
+
+            Double_t lms_ts_both = trig1.get_tSum_LMS_BothFired();
+
+            cout<< "TSum and LMS  fired: " << lms_ts_f <<" TSum that were LMS Elligible: " << lms_ts_e << " LMS Trigger Efficiency from TSum: " << lms_ts_eff << "%\n";
+            cout<<"Total amount of time TSum and LMS fired together: " << lms_ts_both << endl;
+        }
     }
+
+    
+    
 
     return 0;
 }

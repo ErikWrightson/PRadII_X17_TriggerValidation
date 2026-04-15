@@ -26,9 +26,9 @@ Trigger::Trigger(TChain* c, bool gem){
 
     //HyCal Information
     chain->SetBranchAddress("hycal.nch",       &numChan);
-    chain->SetBranchAddress("hycal.crate",     crate);
+    /*chain->SetBranchAddress("hycal.crate",     crate);
     chain->SetBranchAddress("hycal.slot",      slot);
-    chain->SetBranchAddress("hycal.channel",   channel);
+    chain->SetBranchAddress("hycal.channel",   channel);*/
     chain->SetBranchAddress("hycal.module_id", modId);
     chain->SetBranchAddress("hycal.nsamples",  nSamps);
     chain->SetBranchAddress("hycal.samples",   samps);
@@ -36,7 +36,7 @@ Trigger::Trigger(TChain* c, bool gem){
     chain->SetBranchAddress("hycal.ped_rms",   pedRMS);
     chain->SetBranchAddress("hycal.integral",  integral);
     
-    //Waveform Information
+    //HyCal Waveform Information
     if (chain->GetBranch("hycal.npeaks")) {
         chain->SetBranchAddress("hycal.npeaks",        nPeaks);
         chain->SetBranchAddress("hycal.peak_height",   peakHeight);
@@ -54,6 +54,47 @@ Trigger::Trigger(TChain* c, bool gem){
         chain->Branch("gem.ssp_samples",  sspSamp);
         chain->Branch("n_ssp_triggers",   numSSPTrigs);
         chain->Branch("ssp_trigger_tags", sspTrigTags);
+    }
+
+
+    //LMS Information
+    chain->SetBranchAddress("lms.nch",       &lms_numChan);
+    /*chain->SetBranchAddress("lms.crate",     lms_crate);
+    chain->SetBranchAddress("lms.slot",      lms_slot);
+    chain->SetBranchAddress("lms.channel",   lms_channel);*/
+    chain->SetBranchAddress("lms.id", lms_modId);
+    chain->SetBranchAddress("lms.nsamples",  lms_nSamps);
+    chain->SetBranchAddress("lms.samples",   lms_samps);
+    chain->SetBranchAddress("lms.ped_mean",  lms_pedMean);
+    chain->SetBranchAddress("lms.ped_rms",   lms_pedRMS);
+    chain->SetBranchAddress("lms.integral",  lms_integral);
+    
+    //LMS Waveform Information
+    if (chain->GetBranch("lms.npeaks")) {
+        chain->SetBranchAddress("lms.npeaks",        lms_nPeaks);
+        chain->SetBranchAddress("lms.peak_height",   lms_peakHeight);
+        chain->SetBranchAddress("lms.peak_time",     lms_peakTime);
+        chain->SetBranchAddress("lms.peak_integral", lms_peakIntegral);
+    }
+
+    //Veto Information
+    chain->SetBranchAddress("veto.nch",       &veto_numChan);
+    /*chain->SetBranchAddress("veto.crate",     veto_crate);
+    chain->SetBranchAddress("veto.slot",      veto_slot);
+    chain->SetBranchAddress("veto.channel",   veto_channel);*/
+    chain->SetBranchAddress("veto.id", veto_modId);
+    chain->SetBranchAddress("veto.nsamples",  veto_nSamps);
+    chain->SetBranchAddress("veto.samples",   veto_samps);
+    chain->SetBranchAddress("veto.ped_mean",  veto_pedMean);
+    chain->SetBranchAddress("veto.ped_rms",   veto_pedRMS);
+    chain->SetBranchAddress("veto.integral",  veto_integral);
+    
+    //Veto Waveform Information
+    if (chain->GetBranch("veto.npeaks")) {
+        chain->SetBranchAddress("veto.npeaks",        veto_nPeaks);
+        chain->SetBranchAddress("veto.peak_height",   veto_peakHeight);
+        chain->SetBranchAddress("veto.peak_time",     veto_peakTime);
+        chain->SetBranchAddress("veto.peak_integral", veto_peakIntegral);
     }
     
 }

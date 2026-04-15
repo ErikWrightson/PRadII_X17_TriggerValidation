@@ -16,7 +16,7 @@ ANA_H = $(ANA_C: .cxx=.h)
 default:	TrigVal
 clean:
 	@echo "Remove files: " ./*.o ./*~ ./main .includes/*.o
-	@rm -f ./*.o ./*~ ./Ap_QuickSim ./includes/*.o
+	@rm -f ./*.o ./*~ ./TrigVal ./includes/*.o
 	@echo "make clean command done..."
 
 ./%.o:	./%.cxx ./%.h
@@ -28,6 +28,6 @@ main.o: $(ANA_H) main.cxx
 
 TrigVal:		main.o $(ANA_O) $(ANAc_O) $(ANAC_O)
 	@echo "Link Fit"
-	@echo g++ $(FLAGS) -I $(ROOTINC) -I includes/ -o TrigVal $(ANA_O) $(ANAc_O) $(ANAC_O) main.o $(ROOTLIB) -lGenVector -lsqlite3 -L includes/util/FileProcessUtil.cxx
+	@echo g++ $(FLAGS) -I $(ROOTINC) -I includes/ -o TrigVal $(ANA_O) $(ANAc_O) $(ANAC_O) main.o $(ROOTLIB) -lGenVector -lsqlite3
 	@g++ $(FLAGS) -I $(ROOTINC) -I includes/ -o TrigVal $(ANA_O) $(ANAc_O) $(ANAC_O) main.o  $(ROOTLIB) -lGenVector -lsqlite3
 	@echo "Compilation Done"

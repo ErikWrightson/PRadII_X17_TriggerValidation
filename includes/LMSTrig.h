@@ -45,10 +45,6 @@ class LMSTrig: public Trigger{
 
     public:
 
-        //Statically set the flags for this trigger type.
-        static const Int_t EXT_FLAG = 0x0FF0000;
-        static const Int_t RAND_FLAG = 0x01000000;
-
         //Constuctor that ensures the chain is set up via the parent constructor.
         LMSTrig(TChain* c);
 
@@ -60,6 +56,7 @@ class LMSTrig: public Trigger{
         Double_t get_Rand_LMS_Found();
         Double_t get_tSum_LMS_Elligible();
         Double_t get_tSum_LMS_Found();
+        Double_t get_tSum_LMS_BothFired();
 
     private:
         Double_t rand_LMS_Elligible;
@@ -67,6 +64,8 @@ class LMSTrig: public Trigger{
 
         Double_t tSum_LMS_Elligible;
         Double_t tSum_LMS_Found;
+        Double_t tSum_LMS_BothFire;
+
 
 
 };

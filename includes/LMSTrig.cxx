@@ -40,31 +40,36 @@ void LMSTrig::ProcessData(bool self, bool rand, bool tSum){
 
     tSum_LMS_Elligible = 0;
     tSum_LMS_Found = 0;
+
+    tSum_LMS_BothFire = 0;
     
     for(Int_t i = 0; i < entries; i++){
         chain->GetEntry(i);
 
-        if(self && (trigType & (1<<LMS_TFLAG)) && (trigger & LMS_FLAG)){
+        if(self && (trigType & (1<<LMS_TFLAG)) && (trigger_bits & LMS_FLAG)){
 
         }
         if(rand && (trigger_bits & (1<<RAND_FC_FLAG))){
 
         }
-        if(tSum && (trigType & (1<<SSP_RAWSUM_TFLAG)) && (trigger_bits & (1<<TSUM_FLAG))){
+        if(tSum && (trigger_bits & (1<<TSUM_FLAG))){ //(trigType & (1<<SSP_RAWSUM_TFLAG))
             Int_t crysFire = 0;
-            Int_t LMS_RefFire = 0;
+            
+            if(trigger_bits & (1<<LMS_FLAG)){tSum_LMS_BothFire++;}
 
-            for(int x = 0; x < numChan; x++){
-                //Checks that all 3 LMS Reference PMT Channels fired and that at least 3 crystals fired.
-                //Technically all should fire, but limiting to three allows for the least amount of channels to be checked.
-                if(crysFire >= 3 && LMS_RefFire >= 3){
-                    tSum_LMS_Elligible++;
-                    if((trigType & EXT_FLAG) && (trigger & LMS_FLAG)){tSum_LMS_Found++;}
-                    break;
+            if(lms_numChan==3){
+                
+                for(int x = 0; x < numChan; x++){
+                    //Checks that all 3 LMS Reference PMT Channels fired and that at least 3 crystals fired.
+                    //Technically all should fire, but limiting to three allows for the least amount of channels to be checked.
+                    if(crysFire >= 3){
+                        tSum_LMS_Elligible++;
+                        if((trigger_bits & (1<<LMS_FLAG))){tSum_LMS_Found++;} //(trigType & EXT_FLAG) &&
+                        break;
+                    }
+
+                    if(modId[x] > 1000 && modId[x]<3000){crysFire++;}
                 }
-
-                if(crysFire && modId[x] > 1000 && modId[x]<3000){crysFire++;}
-                if(modId[x] > 3000 && modId[x]<4000){LMS_RefFire++;}
             }
 
         }
@@ -76,3 +81,4 @@ Double_t LMSTrig::get_Rand_LMS_Elligible(){return rand_LMS_Elligible;}
 Double_t LMSTrig::get_Rand_LMS_Found(){return rand_LMS_Found;}
 Double_t LMSTrig::get_tSum_LMS_Elligible(){return tSum_LMS_Elligible;}
 Double_t LMSTrig::get_tSum_LMS_Found(){return tSum_LMS_Found;}
+Double_t LMSTrig::get_tSum_LMS_BothFired(){return tSum_LMS_BothFire;}
