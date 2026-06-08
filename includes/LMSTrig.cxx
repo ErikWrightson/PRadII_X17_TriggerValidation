@@ -46,7 +46,17 @@ void LMSTrig::ProcessData(bool self, bool rand, bool tSum){
     for(Int_t i = 0; i < entries; i++){
         chain->GetEntry(i);
 
-        if(self && (trigType & (1<<LMS_TFLAG)) && (trigger_bits & LMS_FLAG)){
+        if(self && (trigger_bits & (1<<LMS_FLAG))){
+            Int_t selfChCount = 0;
+            for(int y = 0; y < numChan; y++){
+                if(modId[y] > 1000 && modId[y]<3000){
+                    selfChCount++;
+                }
+            }
+
+            if(selfChCount != 1151){
+                
+            }
 
         }
         if(rand && (trigger_bits & (1<<RAND_FC_FLAG))){

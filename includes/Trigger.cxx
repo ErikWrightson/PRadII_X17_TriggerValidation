@@ -2,13 +2,13 @@
  * Trigger parent class that instantiates and sets up the trees that all the trigger types have in common.
  *
  * @author Erik Wrightson
- * @version 04.10.2026
+ * @version 05.28.2026
  * @creation 04.10.2026
  */
 #include "Trigger.h"
 
 /**
- * Creates a trigger object and then sets the known branches that are in the PRadII/X17 level 1 replay trees.
+ * Creates a trigger object and then sets the known branches that are in the PRadII/X17 level 1 raw replay trees.
  *
  * @param c - the TChain to set up the branching and trees for.
  * @param gem - boolean flag for if any GEM information is needed for this trigger.
@@ -97,6 +97,47 @@ Trigger::Trigger(TChain* c, bool gem){
         chain->SetBranchAddress("veto.peak_integral", veto_peakIntegral);
     }
     
+}
+
+/**
+ * Creates a Trigger object and then sets the known branches that are in the PRadII/X17 level 2 reconstructed replay trees.
+ *
+ * @param c - the TChain of root files to evaluate.
+ * @param gem - boolean flag for if any GEM information is needed for this trigger.
+ * @param recon - boolean flag for if the reconstructed branches are to be used.
+ */
+Trigger::Trigger(TChain* c, bool gem, bool recon){
+
+    chain = (TChain*) c;
+
+    chain->SetMakeClass(1);
+
+    //General Event Data
+    chain->SetBranchAddress("event_num",       &eventNum);
+    chain->SetBranchAddress("trigger_type",    &trigType);
+    chain->SetBranchAddress("trigger_bits",    &trigger_bits);
+    chain->SetBranchAddress("timestamp",       &time);
+
+    //HyCal Information
+    chain->SetBranchAddress("n_clusters", &nClust);
+    chain->SetBranchAddress("cl_x",       cl_x);       //Cluster x position
+    chain->SetBranchAddress("cl_y",       cl_y);       //Cluster y position
+    chain->SetBranchAddress("cl_z",       cl_z);       //Cluster z position
+    chain->SetBranchAddress("cl_energy",  cl_E);       //Cluster energy
+    chain->SetBranchAddress("cl_nblocks", cl_nblocks); //Number of blocks in the cluster
+    chain->SetBranchAddress("cl_center",  cl_center);  //center module id for this cluster
+    chain->SetBranchAddress("cl_flag",    cl_flag);    //Cluster flags
+
+    if(gem){
+        chain->SetBranchAddress("matchFlag", match_flag); //Matching Flag bit 0 for GEM0, bit 1 for GEM1 etc.
+        chain->SetBranchAddress("mHit_gx", matchGEMx);   //The x-coordinate of the Matches found on each GEM plane.
+        chain->SetBranchAddress("mHit_gy", matchGEMy);   //The y-coordinate of the Matches found on each GEM plane.
+        chain->SetBranchAddress("mHit_gz", matchGEMz);   //The z-coordinate of the Matches found on each GEM plane.4
+
+        chain->SetBranchAddress("matchGEMx",  mgx);
+        chain->SetBranchAddress("matchGEMy",  mgy);
+        chain->SetBranchAddress("matchGEMz",  mgz);
+    }
 }
 
 /**

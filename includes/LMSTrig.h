@@ -5,7 +5,7 @@
  * @creation 04.08.2026
  */
 
-#ifndef LMS_Trig_H
+#ifndef LMSTrig_H
 #define LMSTrig_H
 
 //ROOT Includes that may be handy to have.

@@ -3,7 +3,7 @@
  * This allows one definition to be made for all of the attributes that each trigger type share, like loading the TChain and Branches.
  *
  * @author Erik Wrightson
- * @version 04.10.2026
+ * @version 05.28.2026
  * @creation 04.10.2026
  */
 
@@ -61,11 +61,20 @@ class Trigger{
         static constexpr UInt_t CL1_FLAG = 9;  // Single Cluster trigger flag
         static constexpr UInt_t CL2_FLAG = 10;  // Two Cluster trigger flag
         static constexpr UInt_t CL3_FLAG = 11;  // Three Cluster trigger flag
+
+        static constexpr UInt_t CL1_500_FLAG = 12; // Single Cluster trigger flag with 500 MeV threshold
+        static constexpr UInt_t CL1_600_FLAG = 13; // Single Cluster trigger flag with 600 MeV threshold
+        static constexpr UInt_t CL1_900_FLAG = 14; // Single Cluster trigger flag with 900 MeV threshold
+
         static constexpr UInt_t PULSER_FLAG = 15; // Pulser flag
         static constexpr UInt_t LMS_FLAG = 24;    // LMS LED pulse trigger flag
         static constexpr UInt_t ALPHA_FLAG = 25;  // LMS Alpha pulse flag
         static constexpr UInt_t RAND_FC_FLAG = 26;    // Random Trigger from the Faraday Cup flag
         static constexpr UInt_t MOR_FLAG = 27;
+
+        //Cluster Trigger Thresholds
+        static constexpr Float_t CL_SEED_THR = 60.0; //60 MeV cluster seed threshold
+        static constexpr Float_t CL_IND_THR = 100.0; //100 MeV individual cluster energy threshold
         
 
         //Limits for arrays.
@@ -77,12 +86,15 @@ class Trigger{
         static constexpr Int_t SSP_TIME_SAMPLES   = 6;   // fixed by SSP firmware
         static constexpr Int_t MAX_APVS_PER_MPD   = 16;  // APV slots per MPD
 
-        //
+        //Limits for each detector
         static constexpr Int_t MAX_HC_CHANS = 1728;      //Maximum number of HyCal Channels that could fire.
         static constexpr Int_t MAX_GEM_CHANS = 1000;     //Maximum GEM channels that could fire.
         static constexpr Int_t MAX_NUM_SSP_TRIGS = 1000; //Maximum number of SSP triggers that could fire.
         static constexpr Int_t MAX_LMS_CHANS = 3;        //Maximum number of LMS Channels that could fire.
         static constexpr Int_t MAX_VETO_CHANS = 4;       //Maximum number of Veto Scintillator Channels that could fire.
+
+        static constexpr Int_t  MAX_CLUSTERS = 400;      //Maximum number of clusters.
+        static constexpr Int_t  MAX_GEMS = 4;            //Maximum number of GEMs.
         
         TChain* chain;
 
@@ -92,6 +104,9 @@ class Trigger{
         UInt_t trigger_bits;
         Long64_t time;
 
+        //---------------------------------------------------------------
+        //----RAW Tree Branch Variables----
+        //---------------------------------------------------------------
         //Locations to store the HyCal data.
         Int_t numChan;
         UChar_t crate[MAX_HC_CHANS];
@@ -156,8 +171,32 @@ class Trigger{
         Float_t veto_peakTime[MAX_VETO_CHANS][MAX_PEAKS];
         Float_t veto_peakIntegral[MAX_VETO_CHANS][MAX_PEAKS];
 
+        //---------------------------------------------------------------
+        //----RECON Tree Branch Variables----
+        //---------------------------------------------------------------
+        Int_t nClust;
+        Float_t cl_x[MAX_CLUSTERS];
+        Float_t cl_y[MAX_CLUSTERS];
+        Float_t cl_z[MAX_CLUSTERS];
+        Float_t cl_E[MAX_CLUSTERS];
+        UChar_t cl_nblocks[MAX_CLUSTERS];
+        UShort_t cl_center[MAX_CLUSTERS];
+        UInt_t cl_flag[MAX_CLUSTERS];
+
+        //GEM Matching Information - Useful for event selection for trigger function on specific event types.
+        UInt_t match_flag[MAX_CLUSTERS];
+        Float_t mgx[MAX_CLUSTERS][MAX_GEMS];
+        Float_t mgy[MAX_CLUSTERS][MAX_GEMS];
+        Float_t mgz[MAX_CLUSTERS][MAX_GEMS];
+
+        //GEM Quick two layer match
+        Float_t matchGEMx[MAX_CLUSTERS][2];
+        Float_t matchGEMy[MAX_CLUSTERS][2];
+        Float_t matchGEMz[MAX_CLUSTERS][2];
+
         //Parent Constructor
         Trigger(TChain* c, bool gem);
+        Trigger(TChain* c, bool gem, bool recon);
 
         //Virutal processor function to be overriden by children.
         virtual void ProcessData(bool self, bool rand, bool tSum);
