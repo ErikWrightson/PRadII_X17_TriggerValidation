@@ -1,0 +1,1 @@
+This directory is the local default output directory for this analysis program.

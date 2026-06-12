@@ -41,6 +41,8 @@
 #include <string.h>
 #include <map>
 
+#include "PRadTrigger.h"
+
 using namespace std;
 
 class Trigger{
@@ -95,6 +97,16 @@ class Trigger{
 
         static constexpr Int_t  MAX_CLUSTERS = 400;      //Maximum number of clusters.
         static constexpr Int_t  MAX_GEMS = 4;            //Maximum number of GEMs.
+
+        static constexpr Int_t nSSPBits = 8;             //Number of SSP bits to study.
+
+        // Histogram range for TRIG_TIME (11-bit field → 0..2047)
+        static constexpr Int_t kTrigTimeBins = 101;
+        static constexpr Double_t kTrigTimeMin = -0.5;
+        static constexpr Double_t kTrigTimeMax = 100.5;
+
+        static constexpr Double_t rad2Deg = 180/TMath::Pi(); //Conversion from radians to degrees
+
         
         TChain* chain;
 
@@ -103,6 +115,9 @@ class Trigger{
         UChar_t trigType;
         UInt_t trigger_bits;
         Long64_t time;
+        vector<unsigned int> sspRawBuf;
+        vector<unsigned int>* sspRawPtr;
+        PRadTrigger trig;
 
         //---------------------------------------------------------------
         //----RAW Tree Branch Variables----
@@ -200,6 +215,8 @@ class Trigger{
 
         //Virutal processor function to be overriden by children.
         virtual void ProcessData(bool self, bool rand, bool tSum);
+
+        TH1D* hTrigTime[nSSPBits];
 
 
 };

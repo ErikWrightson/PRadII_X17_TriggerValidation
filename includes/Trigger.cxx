@@ -14,6 +14,8 @@
  * @param gem - boolean flag for if any GEM information is needed for this trigger.
  */
 Trigger::Trigger(TChain* c, bool gem){
+    sspRawPtr = &sspRawBuf;
+
     chain = (TChain*) c;
 
     chain->SetMakeClass(1);
@@ -23,6 +25,7 @@ Trigger::Trigger(TChain* c, bool gem){
     chain->SetBranchAddress("trigger_type",    &trigType);
     chain->SetBranchAddress("trigger_bits",    &trigger_bits);
     chain->SetBranchAddress("timestamp",       &time);
+    chain->SetBranchAddress("ssp_raw",         &sspRawPtr);
 
     //HyCal Information
     chain->SetBranchAddress("hycal.nch",       &numChan);
@@ -96,6 +99,14 @@ Trigger::Trigger(TChain* c, bool gem){
         chain->SetBranchAddress("veto.peak_time",     veto_peakTime);
         chain->SetBranchAddress("veto.peak_integral", veto_peakIntegral);
     }
+
+    for (int b = 0; b < nSSPBits; ++b) {
+        TString name  = TString::Format("hTrigTime_bit%d", b);
+        TString title = TString::Format( "TRIGGER time distribution – bit %d;TRIG_TIME;Counts", b);
+        hTrigTime[b] = new TH1D(name, title, kTrigTimeBins, kTrigTimeMin, kTrigTimeMax);
+        //hTrigTime[b]->SetDirectory(fOut);
+    }
+
     
 }
 
@@ -107,6 +118,7 @@ Trigger::Trigger(TChain* c, bool gem){
  * @param recon - boolean flag for if the reconstructed branches are to be used.
  */
 Trigger::Trigger(TChain* c, bool gem, bool recon){
+    sspRawPtr = &sspRawBuf;
 
     chain = (TChain*) c;
 
@@ -117,6 +129,7 @@ Trigger::Trigger(TChain* c, bool gem, bool recon){
     chain->SetBranchAddress("trigger_type",    &trigType);
     chain->SetBranchAddress("trigger_bits",    &trigger_bits);
     chain->SetBranchAddress("timestamp",       &time);
+    chain->SetBranchAddress("ssp_raw",         &sspRawPtr);
 
     //HyCal Information
     chain->SetBranchAddress("n_clusters", &nClust);
@@ -137,6 +150,13 @@ Trigger::Trigger(TChain* c, bool gem, bool recon){
         chain->SetBranchAddress("matchGEMx",  mgx);
         chain->SetBranchAddress("matchGEMy",  mgy);
         chain->SetBranchAddress("matchGEMz",  mgz);
+    }
+
+    for (int b = 0; b < nSSPBits; ++b) {
+        TString name  = TString::Format("hTrigTime_bit%d", b);
+        TString title = TString::Format( "ALL Events TRIGGER time distribution - bit %d;TRIG_TIME;Counts", b);
+        hTrigTime[b] = new TH1D(name, title, kTrigTimeBins, kTrigTimeMin, kTrigTimeMax);
+        //hTrigTime[b]->SetDirectory(fOut);
     }
 }
 

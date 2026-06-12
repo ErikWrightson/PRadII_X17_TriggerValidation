@@ -51,6 +51,9 @@ class ClustTrig: public Trigger{
         //Processing Function inhereted from parent.
         void ProcessData(bool self, bool rand, bool tSum) override;
 
+        //Process the reconstructed data applying a individual energy threshold on each cluster.
+        void ProcessData_OfflineWithThr(bool self, bool rand, bool tSum);
+
         //Getter methods
         /*Double_t get_Rand_LMS_Elligible();
         Double_t get_Rand_LMS_Found();
@@ -99,6 +102,23 @@ class ClustTrig: public Trigger{
         TH1F* h_tSum_3ClustOnly_All;
         //VTP 3 Cluster events for events where only 3 clusters were found.
         TH1F* h_tSum_3ClustOnly_VTP_800;
+
+        //Offline 2 Cluster events; HyCal XY Positions
+        TH2F* h_tSum_2Clust_All_HC_XY;
+        //VTP 2 Cluster events; HyCal XY Positions
+        TH2F* h_tSum_2Clust_VTP_HC_XY;
+        //2 Cluster events missed by the VTP Trigger; HyCal XY, and Theta Positions
+        TH2F* h_tSum_2Clust_Miss_HC_XY;
+        TH1F* h_tSum_2Clust_Miss_HC_Theta;
+        
+
+        //Offline 3 Cluster events; HyCal XY Positions
+        TH2F* h_tSum_3Clust_All_HC_XY;
+        //VTP 3 Cluster events; HyCal XY Positions
+        TH2F* h_tSum_3Clust_VTP_HC_XY;
+        //3 Cluster events missed by the VTP Trigger; HyCal XY, and Theta Positions
+        TH2F* h_tSum_3Clust_Miss_HC_XY;
+        TH1F* h_tSum_3Clust_Miss_HC_Theta;
 
         void setup_Histos();
 

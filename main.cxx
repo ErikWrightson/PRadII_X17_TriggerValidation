@@ -1,7 +1,7 @@
 /**
  * Trigger Validation Processor
  * @author Erik Wrightson
- * @version 04.07.2026
+ * @version 06.08.2026
  * @creation 04.05.2026
  */
 
@@ -38,6 +38,7 @@
 
 #include "includes/Trigger.h"
 #include "includes/LMSTrig.h"
+#include "includes/ClustTrig.h"
 
 
 using namespace std;
@@ -66,7 +67,7 @@ vector<TString> processFileList(string fileListFileName){
  * @param names - the vector of ROOT file names to be linked in the chain.
  */
 TChain* makeChain(vector<TString> names){
-        TChain* chain = new TChain("events");
+        TChain* chain = new TChain("recon");//"events");
         for(unsigned int i = 0; i < names.size(); i++){
             chain->Add(names.at(i));
         }
@@ -190,6 +191,17 @@ int main (int argc, char **argv){
 
             cout<< "TSum and LMS  fired: " << lms_ts_f <<" TSum that were LMS Elligible: " << lms_ts_e << " LMS Trigger Efficiency from TSum: " << lms_ts_eff << "%\n";
             cout<<"Total amount of time TSum and LMS fired together: " << lms_ts_both << endl;
+        }
+    }
+
+    if(vtp_clust){
+        ClustTrig Cl_trig = ClustTrig(fChain);
+        
+        Cl_trig.ProcessData(self, rand, comp_TotalSum);
+
+        if(comp_TotalSum){
+            TString pdfName_Clust_tSum = "outfiles/ClusteringTriggerTSum_More_100MeV.pdf";
+            Cl_trig.printTSumPDF(pdfName_Clust_tSum);
         }
     }
 
