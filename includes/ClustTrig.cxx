@@ -75,7 +75,7 @@ void ClustTrig::ProcessData(bool self, bool rand, bool tSum){
 
                 Double_t theta = TMath::ATan2(TMath::Sqrt(cl_x[j]*cl_x[j]+cl_y[j]*cl_y[j]),cl_z[j])*rad2Deg;
 
-                if(nClust >= 2 && cl_E[j] > CL_IND_THR){
+                if(nClust >= 2){
                     if(!trig.GetTriggersBit(CL2_FLAG-nSSPBits)->empty()){
                         h_tSum_2Clust_VTP_HC_XY->Fill(cl_x[j], cl_y[j]);
                     }
@@ -86,7 +86,7 @@ void ClustTrig::ProcessData(bool self, bool rand, bool tSum){
                     h_tSum_2Clust_All_HC_XY->Fill(cl_x[j], cl_y[j]);
                 }
 
-                if(nClust >= 3 && cl_E[j] > CL_IND_THR){
+                if(nClust >= 3){
                     if(!trig.GetTriggersBit(CL3_FLAG-nSSPBits)->empty()){
                         h_tSum_3Clust_VTP_HC_XY->Fill(cl_x[j], cl_y[j]);
                     }
