@@ -39,65 +39,10 @@
 #include "includes/Trigger.h"
 #include "includes/LMSTrig.h"
 #include "includes/ClustTrig.h"
+#include "includes/Utils.h"
 
 
 using namespace std;
-
-/**
- * Processes the file with the input file name and reads out the root file names contained within and adds them to a vector.
- *
- * @param fileListFileName - the name of the file with the list of ROOT file names.
- */
-vector<TString> processFileList(string fileListFileName){
-        ifstream file(fileListFileName);
-        string line;
-        
-        vector<TString> list;
-        while(getline(file,line)){
-            TString l(line);
-            list.push_back(l);
-        }
-
-        return list;
-}
-
-/**
- * Makes a TChain of the entries in a TString vector assuming they are valid paths to ROOT files.
- *
- * @param names - the vector of ROOT file names to be linked in the chain.
- */
-TChain* makeChain(vector<TString> names){
-        TChain* chain = new TChain("recon");//"events");
-        for(unsigned int i = 0; i < names.size(); i++){
-            chain->Add(names.at(i));
-        }
-
-        return chain;
-}
-
-
-/**
- * Prints out the proper usage directions for this program and what each flag means.
- *
- * @param prog - the progam name that is being currently run.
- */
-static void printUsage(const char *prog)
-{
-    cerr << "Usage: " << prog << " [options]\n"
-              << "\t-a Evaluates for all trigger type efficiencies\n"
-              << "\t-l Evaluates for LMS Trigger efficiency\n"
-              << "\t-s Evaluates for the Total Sum Trigger efficiency\n"
-              << "\t-p Evaluates for the Alpha Source Trigger efficiency\n"
-              << "\t-m Evaluates for the Master OR (T10) Trigger efficiency\n"
-              << "\t-c Evaluates for the VTP Cluster Trigger efficiency\n"
-              << "\t-T Evaluates for trigger efficiencies compared to Total Sum events\n"
-              << "\t-R Evaluates for trigger efficiencies from events with random trigger\n"
-              << "\t-f <filename> of the .root file to evaluate for the various trigger efficiencies\n"
-              << "\t-L <fileList.txt> of the .root files to evaluate. Use if wanting to process multiple files. Follow the format in the README\n"
-              << "\t-e Evaluates this trigger's performance with respect to itself. Only checks for internal performance on fired events."
-              << "\t-h Show this help\n"
-              << "\tNOTE: Either option -f or -L are REQUIRED for running properly.\n";
-}
 
 /**
  * The main function that launches the trigger analysis.
@@ -116,20 +61,24 @@ int main (int argc, char **argv){
     bool comp_TotalSum = false;
     bool rand = false;
     bool self = false;
+    bool recon = false;
 
     string fileName;
     string fileListFileName;
 
+    TString tName = "events";
+    TString outputDirectory = "outfiles/";
+
 	if (argc<2) {
 		cout<<"ERR: Incorrect Arguments: " <<endl;
-        printUsage(argv[0]);
+        Utils::printUsage(argv[0]);
 		
 		return -1;
 	}
 
     // ── Parse command-line ───────────────────────────────────────────────
     int opt;
-    while ((opt = getopt(argc, argv, "alspmchTf:rL:e")) != -1) {
+    while ((opt = getopt(argc, argv, "alspmchTf:rL:eD:N")) != -1) {
         switch (opt) {
             case 'a': all=true; Lms =true; sum=true; alpha=true; mOR=true; vtp_clust = true; break;
             case 'l': Lms = true; break;
@@ -141,15 +90,21 @@ int main (int argc, char **argv){
             case 'R': rand = true; break;
             case 'f': fileName = optarg; break;
             case 'L': fileListFileName = optarg; break;
+            case 'D': outputDirectory = optarg; break;
+            case 'N': recon = true; break;
             case 'e': self = true; break;
             case 'h':
-            default: printUsage(argv[0]); return (opt == 'h') ? 0 : 1;
+            default: Utils::printUsage(argv[0]); return (opt == 'h') ? 0 : 1;
         }
     }
 
     struct stat buffer;   
     bool existOne = (stat(fileName.c_str(), &buffer) == 0);
     bool existList = (stat(fileListFileName.c_str(), &buffer) == 0);
+
+    if(recon){
+        tName = "recon";
+    }
 
     if(!existOne && !existList){
         cerr<<"A single valid input file or a filelist txt file was not provided.\n";
@@ -158,7 +113,7 @@ int main (int argc, char **argv){
 
     vector<TString> fileNameVec;
     if(existList){
-        fileNameVec = processFileList(fileListFileName);
+        fileNameVec = Utils::processFileList(fileListFileName);
     }
     if(existOne){
         fileNameVec.push_back((TString) fileName);
@@ -175,7 +130,7 @@ int main (int argc, char **argv){
         return -2;
     }
 
-    TChain* fChain = makeChain(fileNameVec);
+    TChain* fChain = Utils::makeChain(fileNameVec, tName);
 
     if(Lms){
         LMSTrig trig1 = LMSTrig(fChain);
@@ -195,13 +150,30 @@ int main (int argc, char **argv){
     }
 
     if(vtp_clust){
-        ClustTrig Cl_trig = ClustTrig(fChain);
-        
-        Cl_trig.ProcessData(self, rand, comp_TotalSum);
 
-        if(comp_TotalSum){
-            TString pdfName_Clust_tSum = "outfiles/ClusteringTriggerTSum_More_100MeV.pdf";
-            Cl_trig.printTSumPDF(pdfName_Clust_tSum);
+        if(recon){
+            ClustTrig Cl_trig = ClustTrig(fChain);
+            
+            //Cl_trig.ProcessData(self, rand, comp_TotalSum);
+            Cl_trig.ProcessData_OfflineWithThr(self, rand, comp_TotalSum);
+            
+            if(comp_TotalSum){
+                TString pdfName_Clust_tSum = "outfiles/ClusteringTrigger_wVTPInfo_24917_wCuts.pdf";
+                Cl_trig.printTSumPDF(pdfName_Clust_tSum);
+            }
+        }
+        else{
+            string neighborDb = "database/module_neighbors.txt";
+            map<string, vector<string>> nBMap;
+            map<Int_t, vector<Int_t>> nBMap_ModId;
+            Utils::makeNeighborMap(neighborDb, nBMap, nBMap_ModId);
+
+            string gDb = "database/calibration_factor_3p5_June7.txt";
+            map<string, Float_t> gMap;
+            map<Int_t, Float_t> gMap_ModId;
+            Utils::makeGainMap(gDb, gMap, gMap_ModId);
+
+            ClustTrig Cl_trig_Raw = ClustTrig(fChain, nBMap, nBMap_ModId, gMap, gMap_ModId);
         }
     }
 

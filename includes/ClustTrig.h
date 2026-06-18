@@ -47,6 +47,7 @@ class ClustTrig: public Trigger{
 
         //Constuctor that ensures the chain is set up via the parent constructor.
         ClustTrig(TChain* c);
+        ClustTrig(TChain* c, map<string, vector<string>> m, map<Int_t, vector<Int_t>> m2, map<string, Float_t> g, map<Int_t, Float_t> g2);
 
         //Processing Function inhereted from parent.
         void ProcessData(bool self, bool rand, bool tSum) override;
@@ -66,6 +67,11 @@ class ClustTrig: public Trigger{
     private:
 
         Double_t en;
+        map<string, vector<string>> neighborMap;
+        map<Int_t, vector<Int_t>> neighborMap_ModId;
+
+        map<string, Float_t> gainMap;
+        map<Int_t, Float_t> gainMap_ModId;
 
         //Offline 1 Cluster events (max energy cluster).
         TH1F* h_tSum_1Clust_All;
@@ -87,21 +93,85 @@ class ClustTrig: public Trigger{
         TH1F* h_tSum_2Clust_All;
         //VTP 2 Cluster events (max energy combination).
         TH1F* h_tSum_2Clust_VTP_800;
+        //Offline 2 Cluster events for events where at least 2 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_2Clust_All_MinE;
+        //VTP 2 Cluster events for events where at least 2 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_2Clust_VTP_800_MinE;
+        //Maximum Time difference of 2 Cluster events for events where at least 2 clusters were found.
+        TH1F* h_tSum_2Clust_timeDif;
+        //Maximum Time difference of 2 Cluster events for events where at least 2 clusters were found for events missed by the clustering trigger.
+        TH1F* h_tSum_2Clust_Missed_timeDif;
+        //Maximum Cluster Time for 2 Cluster events for events where at least 2 clusters were found and the clustering trigger did not find it.
+        TH1F* h_tSum_2Clust_Missed_MaxTime;
+        //Minimum Cluster Energy for Missed Events with Delta t < 16 ns where at least 2 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1F* h_tSum_2Clust_Missed_EdeltaT;
+        //Number of Blocks for Missed Events with Delta t < 16 ns where at least 2 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_2Clust_Missed_nBlocks_less;
+        //Number of Blocks for Missed Events with Delta t > 16 ns where at least 2 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_2Clust_Missed_nBlocks_greater;
 
         //Offline 2 Cluster events for events where only 2 clusters were found.
         TH1F* h_tSum_2ClustOnly_All;
         //VTP 2 Cluster events for events where only 2 clusters were found.
         TH1F* h_tSum_2ClustOnly_VTP_800;
+        //Offline 2 Cluster events for events where only 2 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_2ClustOnly_All_MinE;
+        //VTP 2 Cluster events for events where only 2 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_2ClustOnly_VTP_800_MinE;
+        //Time difference of 2 Cluster events for events where only 2 clusters were found.
+        TH1F* h_tSum_2ClustOnly_timeDif;
+        //Maximum Time difference of 2 Cluster events for events where only 2 clusters were found for events missed by the clustering trigger.
+        TH1F* h_tSum_2ClustOnly_Missed_timeDif;
+        //Maximum Cluster Time for 2 Cluster events for events where only 2 clusters were found and the clustering trigger did not find it.
+        TH1F* h_tSum_2ClustOnly_Missed_MaxTime;
+        //Minimum Cluster Energy for Missed Events with Delta t < 16 ns where only 2 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1F* h_tSum_2ClustOnly_Missed_EdeltaT;
+        //Number of Blocks for Missed Events with Delta t < 16 ns where only 2 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_2ClustOnly_Missed_nBlocks_less;
+        //Number of Blocks for Missed Events with Delta t > 16 ns where only 2 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_2ClustOnly_Missed_nBlocks_greater;
 
         //Offline 3 Cluster events (max energy combination).
         TH1F* h_tSum_3Clust_All;
         //VTP 3 Cluster events (max energy combination).
         TH1F* h_tSum_3Clust_VTP_800;
+        //Offline 3 Cluster events for events where at least 3 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_3Clust_All_MinE;
+        //VTP 3 Cluster events for events where at least 3 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_3Clust_VTP_800_MinE;
+        //Maximum Time difference of 3 Cluster events for events where at least 3 clusters were found.
+        TH1F* h_tSum_3Clust_timeDif;
+        //Maximum Time difference of 3 Cluster events for events where at least 3 clusters were found for events missed by the clustering trigger.
+        TH1F* h_tSum_3Clust_Missed_timeDif;
+        //Maximum Cluster Time for 3 Cluster events for events where at least 3 clusters were found and the clustering trigger did not find it.
+        TH1F* h_tSum_3Clust_Missed_MaxTime;
+        //Minimum Cluster Energy for Missed Events with Delta t < 16 ns where at least 3 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1F* h_tSum_3Clust_Missed_EdeltaT;
+        //Number of Blocks for Missed Events with Delta t < 16 ns where at least 3 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_3Clust_Missed_nBlocks_less;
+        //Number of Blocks for Missed Events with Delta t > 16 ns where at least 3 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_3Clust_Missed_nBlocks_greater;
 
         //Offline 3 Cluster events for events where only 3 clusters were found.
         TH1F* h_tSum_3ClustOnly_All;
         //VTP 3 Cluster events for events where only 3 clusters were found.
         TH1F* h_tSum_3ClustOnly_VTP_800;
+        //Offline 3 Cluster events for events where only 3 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_3ClustOnly_All_MinE;
+        //VTP 3 Cluster events for events where only 3 clusters were found (Minimum Cluster E).
+        TH1F* h_tSum_3ClustOnly_VTP_800_MinE;
+        //Time difference of 3 Cluster events for events where only 3 clusters were found.
+        TH1F* h_tSum_3ClustOnly_timeDif;
+        //Maximum Time difference of 3 Cluster events for events where only 3 clusters were found for events missed by the clustering trigger.
+        TH1F* h_tSum_3ClustOnly_Missed_timeDif;
+        //Maximum Cluster Time for 3 Cluster events for events where only 3 clusters were found and the clustering trigger did not find it.
+        TH1F* h_tSum_3ClustOnly_Missed_MaxTime;
+        //Minimum Cluster Energy for Missed Events with Delta t < 16 ns where only 3 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1F* h_tSum_3ClustOnly_Missed_EdeltaT;
+        //Number of Blocks for Missed Events with Delta t < 16 ns where at only 3 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_3ClustOnly_Missed_nBlocks_less;
+        //Number of Blocks for Missed Events with Delta t > 16 ns where only 3 clusters were found, the event was missed by the clustering trigger, and the delta T was less than 16ns.
+        TH1I* h_tSum_3ClustOnly_Missed_nBlocks_greater;
 
         //Offline 2 Cluster events; HyCal XY Positions
         TH2F* h_tSum_2Clust_All_HC_XY;
@@ -110,6 +180,9 @@ class ClustTrig: public Trigger{
         //2 Cluster events missed by the VTP Trigger; HyCal XY, and Theta Positions
         TH2F* h_tSum_2Clust_Miss_HC_XY;
         TH1F* h_tSum_2Clust_Miss_HC_Theta;
+
+        //Number of VTP Clusters - Offline Clusters
+        TH1I* h_tSum_VTP_NClustDiff;
         
 
         //Offline 3 Cluster events; HyCal XY Positions

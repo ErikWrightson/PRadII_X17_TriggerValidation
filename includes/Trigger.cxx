@@ -100,6 +100,12 @@ Trigger::Trigger(TChain* c, bool gem){
         chain->SetBranchAddress("veto.peak_integral", veto_peakIntegral);
     }
 
+    chain->SetBranchAddress("vtp_cl_n",      &vtp_cl_n);      //Number of clusters found by the vtp for each event.
+    chain->SetBranchAddress("vtp_cl_time",   vtp_cl_time);    //Timing for each cluster found by the vtp.
+    chain->SetBranchAddress("vtp_cl_energy", vtp_cl_E);       //Cluster energy for each cluster found by the vtp.
+    chain->SetBranchAddress("vtp_cl_center", vtp_cl_center);  //Module ID of the seed for each cluster found by the vtp.
+    chain->SetBranchAddress("vtp_cl_blocks", vtp_cl_nblocks); //Number of blocks in each cluster found by the vtp.
+
     for (int b = 0; b < nSSPBits; ++b) {
         TString name  = TString::Format("hTrigTime_bit%d", b);
         TString title = TString::Format( "TRIGGER time distribution – bit %d;TRIG_TIME;Counts", b);
@@ -120,16 +126,23 @@ Trigger::Trigger(TChain* c, bool gem){
 Trigger::Trigger(TChain* c, bool gem, bool recon){
     sspRawPtr = &sspRawBuf;
 
+    vtp_roc_tagsPtr = &vtp_roc_tagsBuf;
+    vtp_nwordsPtr = &vtp_nwordsBuf;
+    vtp_wordsPtr = &vtp_wordsBuf;
+
     chain = (TChain*) c;
 
     chain->SetMakeClass(1);
 
     //General Event Data
-    chain->SetBranchAddress("event_num",       &eventNum);
-    chain->SetBranchAddress("trigger_type",    &trigType);
-    chain->SetBranchAddress("trigger_bits",    &trigger_bits);
-    chain->SetBranchAddress("timestamp",       &time);
-    chain->SetBranchAddress("ssp_raw",         &sspRawPtr);
+    chain->SetBranchAddress("event_num",       &eventNum);        //Event Number for this event so it can be matched between raw and reconstructed files.
+    chain->SetBranchAddress("trigger_type",    &trigType);        //Trigger type for this event during the reconstruction window.
+    chain->SetBranchAddress("trigger_bits",    &trigger_bits);    //Trigger bit word of triggers that happened in the reconstruction window.
+    chain->SetBranchAddress("timestamp",       &time);            //Overall timestamp for this event.
+    chain->SetBranchAddress("ssp_raw",         &sspRawPtr);       //Raw SSP trigger decision information to be further decoded.
+    chain->SetBranchAddress("vtp_roc_tags",    &vtp_roc_tagsPtr); //ROC tag vector for the VTP to be further decoded.
+    chain->SetBranchAddress("vtp_nwords",      &vtp_nwordsPtr);   //Number of words in each entry of the VTP words vector to be further decoded.
+    chain->SetBranchAddress("vtp_words",       &vtp_wordsPtr);    //Vector of words from the VTP to be further decoded.
 
     //HyCal Information
     chain->SetBranchAddress("n_clusters", &nClust);
@@ -139,17 +152,24 @@ Trigger::Trigger(TChain* c, bool gem, bool recon){
     chain->SetBranchAddress("cl_energy",  cl_E);       //Cluster energy
     chain->SetBranchAddress("cl_nblocks", cl_nblocks); //Number of blocks in the cluster
     chain->SetBranchAddress("cl_center",  cl_center);  //center module id for this cluster
+    chain->SetBranchAddress("cl_time",    cl_time);    //time of the seed module for this cluster
     chain->SetBranchAddress("cl_flag",    cl_flag);    //Cluster flags
+
+    chain->SetBranchAddress("vtp_cl_n",      &vtp_cl_n);      //Number of clusters found by the vtp for each event.
+    chain->SetBranchAddress("vtp_cl_time",   vtp_cl_time);    //Timing for each cluster found by the vtp.
+    chain->SetBranchAddress("vtp_cl_energy", vtp_cl_E);       //Cluster energy for each cluster found by the vtp.
+    chain->SetBranchAddress("vtp_cl_center", vtp_cl_center);  //Module ID of the seed for each cluster found by the vtp.
+    chain->SetBranchAddress("vtp_cl_blocks", vtp_cl_nblocks); //Number of blocks in each cluster found by the vtp.
 
     if(gem){
         chain->SetBranchAddress("matchFlag", match_flag); //Matching Flag bit 0 for GEM0, bit 1 for GEM1 etc.
-        chain->SetBranchAddress("mHit_gx", matchGEMx);   //The x-coordinate of the Matches found on each GEM plane.
-        chain->SetBranchAddress("mHit_gy", matchGEMy);   //The y-coordinate of the Matches found on each GEM plane.
-        chain->SetBranchAddress("mHit_gz", matchGEMz);   //The z-coordinate of the Matches found on each GEM plane.4
+        chain->SetBranchAddress("mHit_gx", matchGEMx);    //The x-coordinate of the best match found on each GEM plane.
+        chain->SetBranchAddress("mHit_gy", matchGEMy);    //The y-coordinate of the best match found on each GEM plane.
+        chain->SetBranchAddress("mHit_gz", matchGEMz);    //The z-coordinate of the best match found on each GEM plane.
 
-        chain->SetBranchAddress("matchGEMx",  mgx);
-        chain->SetBranchAddress("matchGEMy",  mgy);
-        chain->SetBranchAddress("matchGEMz",  mgz);
+        chain->SetBranchAddress("matchGEMx",  mgx);       //All x-coordinate matches found for on the GEMs.
+        chain->SetBranchAddress("matchGEMy",  mgy);       //All y-coordinate matches found for on the GEMs.
+        chain->SetBranchAddress("matchGEMz",  mgz);       //All z-coordinate matches found for on the GEMs.
     }
 
     for (int b = 0; b < nSSPBits; ++b) {

@@ -42,6 +42,7 @@
 #include <map>
 
 #include "PRadTrigger.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -98,6 +99,8 @@ class Trigger{
         static constexpr Int_t  MAX_CLUSTERS = 400;      //Maximum number of clusters.
         static constexpr Int_t  MAX_GEMS = 4;            //Maximum number of GEMs.
 
+        static constexpr Int_t MAX_VTP_CLUSTERS = 100;    //Maximum Number of clusters found by the VTP for the online clustering trigger.
+
         static constexpr Int_t nSSPBits = 8;             //Number of SSP bits to study.
 
         // Histogram range for TRIG_TIME (11-bit field → 0..2047)
@@ -118,6 +121,23 @@ class Trigger{
         vector<unsigned int> sspRawBuf;
         vector<unsigned int>* sspRawPtr;
         PRadTrigger trig;
+
+        //Vectors containing the vtp bank information from the clustering triggers.
+        vector<unsigned int> vtp_roc_tagsBuf;
+        vector<unsigned int>* vtp_roc_tagsPtr;
+
+        vector<unsigned int> vtp_nwordsBuf;
+        vector<unsigned int>* vtp_nwordsPtr;
+        
+        vector<unsigned int> vtp_wordsBuf;
+        vector<unsigned int>* vtp_wordsPtr;
+
+        //Decoded VTP cluster information
+        Int_t vtp_cl_n;
+        Int_t vtp_cl_time[MAX_VTP_CLUSTERS];
+        Int_t vtp_cl_E[MAX_VTP_CLUSTERS];
+        Int_t vtp_cl_center[MAX_VTP_CLUSTERS];
+        Int_t vtp_cl_nblocks[MAX_VTP_CLUSTERS];
 
         //---------------------------------------------------------------
         //----RAW Tree Branch Variables----
@@ -196,6 +216,7 @@ class Trigger{
         Float_t cl_E[MAX_CLUSTERS];
         UChar_t cl_nblocks[MAX_CLUSTERS];
         UShort_t cl_center[MAX_CLUSTERS];
+        Float_t cl_time[MAX_CLUSTERS];
         UInt_t cl_flag[MAX_CLUSTERS];
 
         //GEM Matching Information - Useful for event selection for trigger function on specific event types.

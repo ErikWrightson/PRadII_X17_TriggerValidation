@@ -1,0 +1,3 @@
+/volatile/hallb/prad/wrightso/TriggerRun4Rafo/prad_025206/prad_025206_recon.root
+/volatile/hallb/prad/wrightso/TriggerRun4Rafo/prad_025207/prad_025207_recon.root
+/volatile/hallb/prad/wrightso/TriggerRun4Rafo/prad_025207/prad_025207_recon.root
