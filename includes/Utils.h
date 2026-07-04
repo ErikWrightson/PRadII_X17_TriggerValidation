@@ -50,6 +50,25 @@ class Utils{
 
     public:
 
+        struct LineOfBestFit{
+            Float_t x0;
+            Float_t y0;
+            Float_t z0;
+
+            Float_t vx;
+            Float_t vy;
+            Float_t vz;
+        };
+
+        struct Point{
+            Float_t x;
+            Float_t y;
+            Float_t z;
+        };
+        
+
+        static LineOfBestFit FitLine(vector<Float_t> x, vector<Float_t> y, vector<Float_t> z);
+        static Point ClosestApproachToZAxis(Utils::LineOfBestFit line);
         static void printUsage(const char *prog);
         static vector<TString> processFileList(string fileListFileName);
         static TChain* makeChain(vector<TString> names, TString treeName);

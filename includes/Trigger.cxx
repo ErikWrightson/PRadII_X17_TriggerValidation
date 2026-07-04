@@ -190,3 +190,32 @@ Trigger::Trigger(TChain* c, bool gem, bool recon){
 void Trigger::ProcessData(bool self, bool rand, bool tSum){
     cout<<"This should be overriden by all child classes.";
 }
+
+/**
+ * 
+ *
+ * @author - Rafayel Paramuzyan <rafo@jlab.org> ()
+ */
+array<double, Trigger::nSamples> Trigger::ComputeTimeBinnedESum(int n_ch, const Float_t peak_integral[][nMaxPeaksPerCh], const Float_t peak_time[][nMaxPeaksPerCh]){
+    array<double, nSamples> sums{};
+    if (n_ch <= 0) return sums;
+
+    for (int c = 0; c < n_ch; ++c) {
+        for (int p = 0; p < nMaxPeaksPerCh; ++p) {
+            const double e = double(peak_integral[c][p]);
+            if (e == 0.0) continue;          // skip empty slots
+            const double t = peak_time[c][p];
+
+            // i contributes when i*step <= t < i*step + window
+            //   ⇒  (t - window)/step  <  i  <=  t/step
+            int iMin = static_cast<int>(floor((t - kSampleWindow) / kSampleStep)) + 1;
+            int iMax = static_cast<int>(floor(t / kSampleStep));
+            if (iMin < 0)         iMin = 0;
+            if (iMax >= nSamples) iMax = nSamples - 1;
+
+            for (int i = iMin; i <= iMax; ++i)
+                sums[i] += e;
+        }
+    }
+    return sums;
+}

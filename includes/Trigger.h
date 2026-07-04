@@ -76,8 +76,9 @@ class Trigger{
         static constexpr UInt_t MOR_FLAG = 27;
 
         //Cluster Trigger Thresholds
-        static constexpr Float_t CL_SEED_THR = 60.0; //60 MeV cluster seed threshold
-        static constexpr Float_t CL_IND_THR = 100.0; //100 MeV individual cluster energy threshold
+        static constexpr Float_t CL_SEED_THR = 40.0;//50.0;//60.0; //60 MeV cluster seed threshold
+        static constexpr Float_t CL_IND_THR = 70.0;//80.0;//100.0; //100 MeV individual cluster energy threshold
+        static constexpr Float_t CL_IND_MAX_THR = 1800.0;//MeV individual cluster maximum energy threshold
         
 
         //Limits for arrays.
@@ -101,6 +102,8 @@ class Trigger{
 
         static constexpr Int_t MAX_VTP_CLUSTERS = 100;    //Maximum Number of clusters found by the VTP for the online clustering trigger.
 
+        static constexpr int nMaxPeaksPerCh = 8;    // peak_integral[nch][8] — 2D array!
+
         static constexpr Int_t nSSPBits = 8;             //Number of SSP bits to study.
 
         // Histogram range for TRIG_TIME (11-bit field → 0..2047)
@@ -109,6 +112,11 @@ class Trigger{
         static constexpr Double_t kTrigTimeMax = 100.5;
 
         static constexpr Double_t rad2Deg = 180/TMath::Pi(); //Conversion from radians to degrees
+
+        static constexpr int    nSamples       = 100;
+        static constexpr double kSampleStep    = 4.0;   // window step
+        static constexpr double kSampleWindow  = 16.0;  // window width
+
 
         
         TChain* chain;
@@ -134,10 +142,10 @@ class Trigger{
 
         //Decoded VTP cluster information
         Int_t vtp_cl_n;
-        Int_t vtp_cl_time[MAX_VTP_CLUSTERS];
-        Int_t vtp_cl_E[MAX_VTP_CLUSTERS];
-        Int_t vtp_cl_center[MAX_VTP_CLUSTERS];
-        Int_t vtp_cl_nblocks[MAX_VTP_CLUSTERS];
+        UShort_t vtp_cl_time[MAX_VTP_CLUSTERS];
+        UShort_t vtp_cl_E[MAX_VTP_CLUSTERS];
+        UShort_t vtp_cl_center[MAX_VTP_CLUSTERS];
+        UChar_t vtp_cl_nblocks[MAX_VTP_CLUSTERS];
 
         //---------------------------------------------------------------
         //----RAW Tree Branch Variables----
@@ -236,6 +244,8 @@ class Trigger{
 
         //Virutal processor function to be overriden by children.
         virtual void ProcessData(bool self, bool rand, bool tSum);
+
+        array<double, Trigger::nSamples> ComputeTimeBinnedESum(int n_ch, const Float_t peak_integral[][nMaxPeaksPerCh], const Float_t peak_time[][nMaxPeaksPerCh]);
 
         TH1D* hTrigTime[nSSPBits];
 

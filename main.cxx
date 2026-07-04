@@ -62,12 +62,15 @@ int main (int argc, char **argv){
     bool rand = false;
     bool self = false;
     bool recon = false;
+    bool applyOfflineCuts = true;
 
     string fileName;
     string fileListFileName;
 
     TString tName = "events";
     TString outputDirectory = "outfiles/";
+    TString rootOutputDirectory = "rootOutfiles/";
+    TString fn = "ClusteringTrigger_wVTPInfo_25376_wCuts_Partial";
 
 	if (argc<2) {
 		cout<<"ERR: Incorrect Arguments: " <<endl;
@@ -75,10 +78,11 @@ int main (int argc, char **argv){
 		
 		return -1;
 	}
+    
 
     // ── Parse command-line ───────────────────────────────────────────────
     int opt;
-    while ((opt = getopt(argc, argv, "alspmchTf:rL:eD:N")) != -1) {
+    while ((opt = getopt(argc, argv, "alspmchTf:rL:eD:No:C")) != -1) {
         switch (opt) {
             case 'a': all=true; Lms =true; sum=true; alpha=true; mOR=true; vtp_clust = true; break;
             case 'l': Lms = true; break;
@@ -91,8 +95,10 @@ int main (int argc, char **argv){
             case 'f': fileName = optarg; break;
             case 'L': fileListFileName = optarg; break;
             case 'D': outputDirectory = optarg; break;
+            case 'o': fn = optarg; break;
             case 'N': recon = true; break;
             case 'e': self = true; break;
+            case 'C': applyOfflineCuts = false; break;
             case 'h':
             default: Utils::printUsage(argv[0]); return (opt == 'h') ? 0 : 1;
         }
@@ -153,13 +159,31 @@ int main (int argc, char **argv){
 
         if(recon){
             ClustTrig Cl_trig = ClustTrig(fChain);
-            
-            //Cl_trig.ProcessData(self, rand, comp_TotalSum);
-            Cl_trig.ProcessData_OfflineWithThr(self, rand, comp_TotalSum);
+            if(applyOfflineCuts){
+                Cl_trig.ProcessData_OfflineWithThr(self, rand, comp_TotalSum);
+            }
+            else{
+                Cl_trig.ProcessData(self, rand, comp_TotalSum);
+            }
             
             if(comp_TotalSum){
-                TString pdfName_Clust_tSum = "outfiles/ClusteringTrigger_wVTPInfo_24917_wCuts.pdf";
-                Cl_trig.printTSumPDF(pdfName_Clust_tSum);
+                Cl_trig.printTSumPDF(outputDirectory + fn + "_TSum.pdf");
+                Cl_trig.SaveAllTSumHistograms(rootOutputDirectory + fn +"_TSum.root");
+                Cl_trig.delete_tSum_Histos();
+            }
+
+            if(rand){
+                Cl_trig.printRandPDF(outputDirectory + fn + "_wMax_Rand.pdf");
+                Cl_trig.SaveAllRandHistograms(rootOutputDirectory + fn +"_wMax_Rand.root");
+                Cl_trig.delete_rand_Histos();
+
+                if(applyOfflineCuts){
+                    Cl_trig.setUseMax(false);
+                    Cl_trig.ProcessData_OfflineWithThr(self, rand, comp_TotalSum);
+                    Cl_trig.printRandPDF(outputDirectory + fn + "_NoMax_Rand.pdf");
+                    Cl_trig.SaveAllRandHistograms(rootOutputDirectory + fn +"_NoMax_Rand.root");
+                    Cl_trig.delete_rand_Histos();
+                }
             }
         }
         else{
@@ -175,6 +199,18 @@ int main (int argc, char **argv){
 
             ClustTrig Cl_trig_Raw = ClustTrig(fChain, nBMap, nBMap_ModId, gMap, gMap_ModId);
         }
+    }
+
+    if(mOR){
+
+    }
+
+    if(alpha){
+
+    }
+
+    if(sum){
+        
     }
 
     
