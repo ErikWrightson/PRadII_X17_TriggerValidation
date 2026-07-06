@@ -18,8 +18,18 @@ ClustTrig::ClustTrig(TChain* c):Trigger(c, true, true){
 
     en = 2239.51;//3485.41;
 
-    vector<Int_t> excludeMod = {1526, 1527, 1528, 1529, 1560, 1563, 1594, 1597, 1628, 1629, 1630, 1631};
+    excludeMod = {1526, 1527, 1528, 1529, 1560, 1563, 1594, 1597, 1628, 1629, 1630, 1631};
 
+    for(Int_t i = 1; i <= 34; i++){
+        excludeOuterEdge.push_back(1000+i);
+    }
+    for(Int_t j = 1; j <= 32; j++){
+        excludeOuterEdge.push_back(j*34+1);
+        excludeOuterEdge.push_back((j+33)*(j+1));
+    }
+    for(Int_t k = 1; k <= 34; k++){
+        excludeOuterEdge.push_back(2112+k);
+    }
     //Set the bounds of the Histograms we are going to visualize.
    Xedge[0] = -17.*20.77; // mm
    Yedge[0] = -17.*20.75; // mm
@@ -455,12 +465,14 @@ void ClustTrig::ProcessData_OfflineWithThr(bool self, bool rand, bool tSum){
     for(Int_t i = 0; i < entries; i++){
         chain->GetEntry(i);
 
-        if((i+1)%10000 == 0 || (entries-i+1)<10000){
+        if((i+1)%1000 == 0 || (entries-i+1)<10000){
             cout<<"\rClustering Trigger Events: " << i+1 << "/" << entries << flush;
             if(i+1 == entries){
                 cout<<endl;
             }
         }
+
+        if(rand && (nClust < 3 || nClust > 50)){continue;}
 
         trig.Parse(*sspRawPtr);
 
@@ -477,10 +489,17 @@ void ClustTrig::ProcessData_OfflineWithThr(bool self, bool rand, bool tSum){
         if(self && (trigger_bits & (1<<CL1_FLAG))){
 
         }
-        if(rand && (trigger_bits & (1<<RAND_FC_FLAG))){
+        if(rand){ //&& (trigger_bits & (1<<RAND_FC_FLAG))){
             fill_rand_Histos_wThr(i);
 
-            for(Int_t m = 0; m < nSSPBits - 1; m++){
+        }
+        if(tSum && (!trig.GetTriggersBit(TSUM_FLAG-nSSPBits)->empty()) && !(trigger_bits & (1<<LMS_FLAG))){//(trigType & (1<<SSP_RAWSUM_TFLAG))
+            fill_tSum_Histos_wThr(i);
+        }
+    }
+
+    if(rand){
+        for(Int_t m = 0; m < nSSPBits - 1; m++){
                 h_rand_3Clust_Sum_Ratio[m] = (TH1F*) h_rand_3Clust_VTP_Sum[m]->Clone();
                 h_rand_3Clust_Sum_Ratio[m]->Divide(h_rand_3Clust_All_Sum);
                 h_rand_3Clust_Sum_Ratio[m]->SetTitle("Trigger Efficiency");
@@ -505,11 +524,6 @@ void ClustTrig::ProcessData_OfflineWithThr(bool self, bool rand, bool tSum){
                 TString dtRatioName  = TString::Format("h_rand_3Clust_deltaT_Ratio_bit%d",m);
                 h_rand_3Clust_deltaT_Ratio[m]->SetName(dtRatioName);
             }
-
-        }
-        if(tSum && (!trig.GetTriggersBit(TSUM_FLAG-nSSPBits)->empty()) && !(trigger_bits & (1<<LMS_FLAG))){//(trigType & (1<<SSP_RAWSUM_TFLAG))
-            fill_tSum_Histos_wThr(i);
-        }
     }
 }
 
@@ -1218,7 +1232,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_1ClustRatio_900->SetAxisRange(0.9,1.0,"Y");
+    h_tSum_1ClustRatio_900->SetAxisRange(0.9,1.03,"Y");
     h_tSum_1ClustRatio_900->Draw("HIST");
     h_tSum_1ClustRatio_800->Draw("HIST SAME");
     h_tSum_1ClustRatio_600->Draw("HIST SAME");
@@ -1289,7 +1303,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_1ClustOnlyRatio_900->SetAxisRange(0.9,1.0,"Y");
+    h_tSum_1ClustOnlyRatio_900->SetAxisRange(0.9,1.03,"Y");
     h_tSum_1ClustOnlyRatio_900->Draw("HIST");
     h_tSum_1ClustOnlyRatio_800->Draw("HIST SAME");
     h_tSum_1ClustOnlyRatio_600->Draw("HIST SAME");
@@ -1338,7 +1352,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_2ClustRatio->SetAxisRange(0.9,1.0, "Y");
+    h_tSum_2ClustRatio->SetAxisRange(0.9,1.03, "Y");
     h_tSum_2ClustRatio->Draw("HIST");
 
     c->Print(pdfName);
@@ -1377,7 +1391,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_2ClustRatio_MinE->SetAxisRange(0.9, 1.0, "Y");
+    h_tSum_2ClustRatio_MinE->SetAxisRange(0.9, 1.03, "Y");
     h_tSum_2ClustRatio_MinE->Draw("HIST");
 
     c->Print(pdfName);
@@ -1441,7 +1455,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_2ClustOnlyRatio->SetAxisRange(0.9, 1.0, "Y");
+    h_tSum_2ClustOnlyRatio->SetAxisRange(0.9, 1.03, "Y");
     h_tSum_2ClustOnlyRatio->Draw("HIST");
 
     c->Print(pdfName);
@@ -1480,7 +1494,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_2ClustOnlyRatio_MinE->SetAxisRange(0.9, 1.0, "Y");
+    h_tSum_2ClustOnlyRatio_MinE->SetAxisRange(0.9, 1.03, "Y");
     h_tSum_2ClustOnlyRatio_MinE->Draw("HIST");
 
     c->Print(pdfName);
@@ -1604,7 +1618,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_3ClustRatio_MinE->SetAxisRange(0.9,1.0,"Y");
+    h_tSum_3ClustRatio_MinE->SetAxisRange(0.9,1.03,"Y");
     h_tSum_3ClustRatio_MinE->Draw("HIST");
 
     c->Print(pdfName);
@@ -1921,7 +1935,7 @@ void ClustTrig::printTSumPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_tSum_3ClustOnlyRatio_MinE->SetAxisRange(0.9, 1.0, "Y");
+    h_tSum_3ClustOnlyRatio_MinE->SetAxisRange(0.9, 1.03, "Y");
     h_tSum_3ClustOnlyRatio_MinE->Draw("HIST");
 
     c->Print(pdfName);
@@ -2419,7 +2433,7 @@ void ClustTrig::delete_tSum_Histos(){
  */
 void ClustTrig::fill_rand_Histos_wThr(Int_t i){
 
-    randInformation passed_3Clust = ComputeTimeBinnedClusters(true);
+    struct randInformation passed_3Clust = ComputeTimeBinnedClusters(true);
     array<double,Trigger::nSamples> cl_sums = passed_3Clust.doubleInfoVecs.at(0);
     array<double,Trigger::nSamples> cl_min = passed_3Clust.doubleInfoVecs.at(1);
     array<double,Trigger::nSamples> cl_max = passed_3Clust.doubleInfoVecs.at(2);
@@ -2439,12 +2453,25 @@ void ClustTrig::fill_rand_Histos_wThr(Int_t i){
     for(Int_t j = 10; j < Trigger::nSamples-10; j++){
         if(cl_count[j] < 3){continue;}
 
-        if(ind_MaxEsum > -1 && cl_sums[j] > cl_sums[ind_MaxEsum]){
+        if(ind_MaxEsum == -1 || cl_sums[j] > cl_sums[ind_MaxEsum]){
             ind_MaxEsum = j;
         }
     }
 
+    Float_t secondMax = -1;
     if(ind_MaxEsum > -1){
+        for(UInt_t b = 0; b < cl_ind[ind_MaxEsum].size(); b++){
+            if(b != cl_maxInd[ind_MaxEsum]){
+                if(secondMax < 0 || cl_E[b] > secondMax){
+                    secondMax = cl_E[b];
+                }
+            }
+        }
+    }
+
+    Float_t twoSum = secondMax + cl_E[cl_maxInd[ind_MaxEsum]];
+
+    if(ind_MaxEsum > -1){ //&& twoSum > en/2.0){ The commented coniditon is used when we want to see the efficiency for events that are like our signals.
         h_rand_3Clust_All_Sum->Fill(cl_sums[ind_MaxEsum]);
         h_rand_3Clust_All_Min->Fill(cl_min[ind_MaxEsum]);
         h_rand_3Clust_All_Max->Fill(cl_max[ind_MaxEsum]);
@@ -2466,8 +2493,8 @@ void ClustTrig::fill_rand_Histos_wThr(Int_t i){
 
                 const vector<int>* times = trig.GetTriggersBit(CL3_FLAG-nSSPBits);
                 for (int t : *times){
-                    h_rand_3Clust_timeCorrEarly[b]->Fill(cl_earlyTime[ind_MaxEsum],t);
-                    h_rand_3Clust_timeCorrLate[b]->Fill(cl_lateTime[ind_MaxEsum],t);
+                    h_rand_3Clust_timeCorrEarly[b]->Fill(floor(cl_time[cl_earlyInd[ind_MaxEsum]]/4.0),t);//floor(cl_earlyTime[ind_MaxEsum]/4.0),t);
+                    h_rand_3Clust_timeCorrLate[b]->Fill(floor(cl_time[cl_lateInd[ind_MaxEsum]]/4.0),t);//cl_lateTime[ind_MaxEsum]/4.0),t);
                 }
 
                 for(UInt_t l = 0; l < cl_ind[ind_MaxEsum].size(); l++){
@@ -2478,9 +2505,18 @@ void ClustTrig::fill_rand_Histos_wThr(Int_t i){
         }
     }
 
-    for(Int_t a = 0; a < vtp_cl_n; a++){
-        h_tSum_VTP_Timing->Fill(vtp_cl_time[a]);
-        h_tSum_VTP_centerID->Fill(vtp_cl_center[a]);  
+    passed_3Clust.doubleInfoVecs.clear();
+    passed_3Clust.doubleInfoVecs.shrink_to_fit();
+
+    passed_3Clust.integerInfoVecs.clear();
+    passed_3Clust.integerInfoVecs.shrink_to_fit();
+
+    for(Int_t a = 0; a < nSamples; a++){
+        passed_3Clust.allIndexVectors[a].clear();
+        passed_3Clust.allIndexVectors[a].shrink_to_fit();
+
+        cl_ind[a].clear();
+        cl_ind[a].shrink_to_fit();
     }
 }
 
@@ -2500,11 +2536,11 @@ void ClustTrig::setup_rand_Histos(){
         h_rand_3Clust_VTP_Max[b] = new TH1F(maxName, maxTitle, en+500,0, en+500);
 
         TString timeEarlyName  = TString::Format("h_rand_3Clust_timeCorrEarly_bit%d", b);
-        TString timeEarlyTitle = TString::Format( "Time of Trigger Firing v. Time of Sum Threshold Crossing by earliest cluster - bit %d;Clust Time [4ns], Trigger Time [4ns]", b);
+        TString timeEarlyTitle = TString::Format( "Time of Trigger Firing v. Time of Sum Threshold Crossing by earliest cluster - bit %d;Clust Time [4ns]; Trigger Time [4ns]", b);
         h_rand_3Clust_timeCorrEarly[b] = new TH2F(timeEarlyName, timeEarlyTitle, kTrigTimeBins, kTrigTimeMin, kTrigTimeMax, kTrigTimeBins, kTrigTimeMin, kTrigTimeMax);
 
         TString timeLateName  = TString::Format("h_rand_3Clust_timeCorrLate_bit%d", b);
-        TString timeLateTitle = TString::Format( "Time of Trigger Firing v. Time of Sum Threshold Crossing by latest cluster - bit %d;Clust Time [4ns], Trigger Time [4ns]", b);
+        TString timeLateTitle = TString::Format( "Time of Trigger Firing v. Time of Sum Threshold Crossing by latest cluster - bit %d;Clust Time [4ns]; Trigger Time [4ns]", b);
         h_rand_3Clust_timeCorrLate[b] = new TH2F(timeLateName, timeLateTitle, kTrigTimeBins, kTrigTimeMin, kTrigTimeMax, kTrigTimeBins, kTrigTimeMin, kTrigTimeMax);
 
         TString XY_Name  = TString::Format("h_rand_3Clust_XY_VTP_bit%d", b);
@@ -2513,7 +2549,7 @@ void ClustTrig::setup_rand_Histos(){
 
         TString dtName = TString::Format("h_rand_3Clust_deltaT_VTP_bit%d", b);
         TString dtTitle = TString::Format("#Deltat (Max_{cl_time} - Min_{cl_time}) - bit %d", b);
-        h_rand_3Clust_deltaT_VTP[nSSPBits] = new TH1F(dtName, dtTitle, 32, 0, 32);
+        h_rand_3Clust_deltaT_VTP[b] = new TH1F(dtName, dtTitle, 32, 0, 32);
         
     }
 
@@ -2521,7 +2557,7 @@ void ClustTrig::setup_rand_Histos(){
     h_rand_3Clust_All_Min = new TH1F("h_rand_3Clust_All_Min", "Random Trigger Event with at least 3 Clusters Found by E_{Min};E_{Min};Counts",en+500,0, en+500);
     h_rand_3Clust_All_Max = new TH1F("h_rand_3Clust_All_Max", "Random Trigger Event with at least 3 Clusters Found by E_{Max};E_{Max};Counts",en+500,0, en+500);
     h_rand_3Clust_XY_All = new TH2F("h_rand_3Clust_XY_All", "Offline Clusters Found when VTP should have fired;x [mm];y [mm]",34, Xedge, 34, Yedge);
-    h_rand_3Clust_deltaT_All = new TH1F("h_rand_3Clust_deltaT_All", "#Deltat (Max_{cl_time} - Min_{cl_time}) All", 32, 0, 32);
+    h_rand_3Clust_deltaT_All = new TH1F("h_rand_3Clust_deltaT_All", "#Deltat (Max_{cl_time} - Min_{cl_time}) with at least 3 Clusters Found", 32, 0, 32);
 }
 
 /**
@@ -2530,28 +2566,7 @@ void ClustTrig::setup_rand_Histos(){
  * @param cl_mult - cluster multiplicity to search for good events in
  * @param appThr - bool to decide if the blocks and individual energy threshold should be applied.
  */
-ClustTrig::randInformation ClustTrig::ComputeTimeBinnedClusters(bool appThr){
-    /*array<double, nSamples> sums{};
-    if (n_ch <= 0) return sums;
-
-    for (int c = 0; c < n_ch; ++c) {
-        for (int p = 0; p < nMaxPeaksPerCh; ++p) {
-            const double e = double(peak_integral[c][p]);
-            if (e == 0.0) continue;          // skip empty slots
-            const double t = peak_time[c][p];
-
-            // i contributes when i*step <= t < i*step + window
-            //   ⇒  (t - window)/step  <  i  <=  t/step
-            int iMin = static_cast<int>(std::floor((t - kSampleWindow) / kSampleStep)) + 1;
-            int iMax = static_cast<int>(std::floor(t / kSampleStep));
-            if (iMin < 0)         iMin = 0;
-            if (iMax >= nSamples) iMax = nSamples - 1;
-
-            for (int i = iMin; i <= iMax; ++i)
-                sums[i] += e;
-        }
-    }
-    return sums;*/
+struct ClustTrig::randInformation ClustTrig::ComputeTimeBinnedClusters(bool appThr){
 
     array<double, Trigger::nSamples> cl_sums{};
     array<double, Trigger::nSamples> cl_min{};
@@ -2567,12 +2582,11 @@ ClustTrig::randInformation ClustTrig::ComputeTimeBinnedClusters(bool appThr){
 
     array<vector<int>, Trigger::nSamples> cl_ind{};
 
-    bool first = true;
     for(int c = 0; c < nClust; c++){
         double e = cl_E[c];
-        if(appThr && (cl_E[c] < CL_IND_THR || cl_nblocks[c] < 2 || (usemax && cl_E[c] > CL_IND_MAX_THR) || binary_search(excludeMod.begin(), excludeMod.end(), cl_center[c]))) continue; 
+        if(appThr && (cl_E[c] < CL_IND_THR || cl_nblocks[c] < 2 || (usemax && cl_E[c] > CL_IND_MAX_THR) || binary_search(excludeMod.begin(), excludeMod.end(), cl_center[c]))) continue; //|| binary_search(excludeOuterEdge.begin(), excludeOuterEdge.end(), cl_center[c]))) continue; 
         double t = cl_time[c];
-
+        
         int iMin = static_cast<int>(std::floor((t - kSampleWindow) / kSampleStep)) + 1;
         int iMax = static_cast<int>(std::floor(t / kSampleStep));
         if (iMin < 0){
@@ -2580,10 +2594,8 @@ ClustTrig::randInformation ClustTrig::ComputeTimeBinnedClusters(bool appThr){
         }
 
         for (int i = iMin; i <= iMax; ++i){
-            cl_sums[i] += e;
-            cl_ind[i].push_back(c);
-            if(first){
-                first = false;
+            
+            if(cl_count[i] == 0){
                 cl_min[i] = e;
                 cl_minInd[i] = c;
 
@@ -2615,26 +2627,29 @@ ClustTrig::randInformation ClustTrig::ComputeTimeBinnedClusters(bool appThr){
                     cl_lateInd[i] = c;
                 }
             }
+
+            cl_sums[i] += e;
+            cl_ind[i].push_back(c);
             cl_count[i] += 1;
         }
 
     }
 
-    vector<array<double, Trigger::nSamples>> retDoubleVec;
+    vector<array<double, Trigger::nSamples>> retDoubleVec = {};
     retDoubleVec.push_back(cl_sums);
     retDoubleVec.push_back(cl_min);
     retDoubleVec.push_back(cl_max);
     retDoubleVec.push_back(cl_earlyTime);
     retDoubleVec.push_back(cl_lateTime);
 
-    vector<array<int, Trigger::nSamples>> retIntegerVec;
+    vector<array<int, Trigger::nSamples>> retIntegerVec = {};
     retIntegerVec.push_back(cl_count);
     retIntegerVec.push_back(cl_minInd);
     retIntegerVec.push_back(cl_maxInd);
     retIntegerVec.push_back(cl_earlyInd);
     retIntegerVec.push_back(cl_lateInd);
 
-    randInformation infoBySampleWindow;
+    struct randInformation infoBySampleWindow;
     infoBySampleWindow.doubleInfoVecs = retDoubleVec;
     infoBySampleWindow.integerInfoVecs = retIntegerVec;
     infoBySampleWindow.allIndexVectors = cl_ind;
@@ -2656,7 +2671,7 @@ void ClustTrig::SaveAllRandHistograms(TString rootfileName){
     (*arr).Add(h_rand_3Clust_XY_All);
     (*arr).Add(h_rand_3Clust_deltaT_All);
 
-    for(Int_t b = 0; b < nSSPBits; b++){
+    for(Int_t b = 0; b < nSSPBits - 1; b++){
         (*arr).Add(h_rand_3Clust_VTP_Sum[b]);
         (*arr).Add(h_rand_3Clust_VTP_Max[b]);
         (*arr).Add(h_rand_3Clust_VTP_Min[b]);
@@ -2695,10 +2710,12 @@ void ClustTrig::delete_rand_Histos(){
         delete h_rand_3Clust_timeCorrLate[b];
         delete h_rand_3Clust_XY_VTP[b];
 
-        delete h_rand_3Clust_Sum_Ratio[b];
-        delete h_rand_3Clust_Max_Ratio[b];
-        delete h_rand_3Clust_Min_Ratio[b];
-        delete h_rand_3Clust_deltaT_Ratio[b];
+        if(b != nSSPBits - 1){
+            delete h_rand_3Clust_Sum_Ratio[b];
+            delete h_rand_3Clust_Max_Ratio[b];
+            delete h_rand_3Clust_Min_Ratio[b];
+            delete h_rand_3Clust_deltaT_Ratio[b];
+        }
     }
 }
 
@@ -2764,7 +2781,7 @@ void ClustTrig::printRandPDF(TString pdfName){
 
     c->cd(2);
     for(Int_t q = 0; q < nSSPBits - 1; q++){
-        h_rand_3Clust_Sum_Ratio[q]->SetAxisRange(0.9,1.0,"Y");
+        h_rand_3Clust_Sum_Ratio[q]->SetAxisRange(0.9,1.03,"Y");
         if(q == 0){
             h_rand_3Clust_Sum_Ratio[q]->Draw("HIST");
         }
@@ -2824,7 +2841,7 @@ void ClustTrig::printRandPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_rand_3Clust_Min_Ratio[0]->SetAxisRange(0.9,1.0,"Y");
+    h_rand_3Clust_Min_Ratio[0]->SetAxisRange(0.9,1.03,"Y");
 
     for(Int_t r = 0; r < nSSPBits - 1; r++){
         if(r == 0){
@@ -2855,7 +2872,7 @@ void ClustTrig::printRandPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    for(Int_t y = 0; y < nSSPBits; y++){
+    for(Int_t y = 0; y < nSSPBits - 1; y++){
         h_rand_3Clust_Max_Ratio[y]->SetLineColor(Bit_Color[y]);
         if(y == 0){
             h_rand_3Clust_Max_Ratio[y]->Draw("HIST");       
@@ -2884,7 +2901,7 @@ void ClustTrig::printRandPDF(TString pdfName){
 	legend->Draw();
 
     c->cd(2);
-    h_rand_3Clust_Max_Ratio[0]->SetAxisRange(0.9,1.0,"Y");
+    h_rand_3Clust_Max_Ratio[0]->SetAxisRange(0.9,1.03,"Y");
 
     for(Int_t s = 0; s < nSSPBits - 1; s++){
         if(s == 0){
@@ -2909,13 +2926,14 @@ void ClustTrig::printRandPDF(TString pdfName){
     legend->SetHeader("Legend","C"); // option "C" allows to center the header
 	legend->AddEntry(h_rand_3Clust_deltaT_All,"All","l");
     for(Int_t g = 0; g < nSSPBits - 1; g++){
+        h_rand_3Clust_deltaT_VTP[g]->SetLineColor(Bit_Color[g]);
         h_rand_3Clust_deltaT_VTP[g]->Draw("SAME HIST");
         legend->AddEntry(h_rand_3Clust_deltaT_VTP[g],Bit_Thr[g], "l");
     }
 	legend->Draw();
 
     c->cd(2);
-    h_rand_3Clust_deltaT_Ratio[0]->SetAxisRange(0.9,1.0,"Y");
+    h_rand_3Clust_deltaT_Ratio[0]->SetAxisRange(0.9,1.03,"Y");
     for(Int_t h = 0; h < nSSPBits - 1; h++){
         if(h == 0){
             h_rand_3Clust_deltaT_Ratio[h]->Draw("HIST");

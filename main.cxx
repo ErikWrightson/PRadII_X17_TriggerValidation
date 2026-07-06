@@ -35,6 +35,7 @@
 #include <TString.h>
 //Needed for reading in vector types from root files.
 #include <TInterpreter.h>
+#include "ROOT/TThreadedObject.hxx"
 
 #include "includes/Trigger.h"
 #include "includes/LMSTrig.h"
@@ -63,6 +64,7 @@ int main (int argc, char **argv){
     bool self = false;
     bool recon = false;
     bool applyOfflineCuts = true;
+    bool batch = false;
 
     string fileName;
     string fileListFileName;
@@ -75,14 +77,13 @@ int main (int argc, char **argv){
 	if (argc<2) {
 		cout<<"ERR: Incorrect Arguments: " <<endl;
         Utils::printUsage(argv[0]);
-		
 		return -1;
 	}
     
 
     // ── Parse command-line ───────────────────────────────────────────────
     int opt;
-    while ((opt = getopt(argc, argv, "alspmchTf:rL:eD:No:C")) != -1) {
+    while ((opt = getopt(argc, argv, "alspmchTf:rL:eD:No:CRb")) != -1) {
         switch (opt) {
             case 'a': all=true; Lms =true; sum=true; alpha=true; mOR=true; vtp_clust = true; break;
             case 'l': Lms = true; break;
@@ -99,6 +100,7 @@ int main (int argc, char **argv){
             case 'N': recon = true; break;
             case 'e': self = true; break;
             case 'C': applyOfflineCuts = false; break;
+            case 'b': batch = true; break;
             case 'h':
             default: Utils::printUsage(argv[0]); return (opt == 'h') ? 0 : 1;
         }
@@ -135,6 +137,9 @@ int main (int argc, char **argv){
             <<"Currently the following options are available:\n\t-L for the LMS option\n\t-c for the VTP clustering trigger.\n";
         return -2;
     }
+    
+    ROOT::EnableThreadSafety();
+    ROOT::EnableImplicitMT(2);
 
     TChain* fChain = Utils::makeChain(fileNameVec, tName);
 
@@ -167,17 +172,17 @@ int main (int argc, char **argv){
             }
             
             if(comp_TotalSum){
-                Cl_trig.printTSumPDF(outputDirectory + fn + "_TSum.pdf");
+                if(!batch){Cl_trig.printTSumPDF(outputDirectory + fn + "_TSum.pdf");}
                 Cl_trig.SaveAllTSumHistograms(rootOutputDirectory + fn +"_TSum.root");
                 Cl_trig.delete_tSum_Histos();
             }
 
             if(rand){
-                Cl_trig.printRandPDF(outputDirectory + fn + "_wMax_Rand.pdf");
-                Cl_trig.SaveAllRandHistograms(rootOutputDirectory + fn +"_wMax_Rand.root");
+                if(!batch){Cl_trig.printRandPDF(outputDirectory + fn + "_wMax_Rand.pdf");}
+                Cl_trig.SaveAllRandHistograms(fn + ".root");//rootOutputDirectory + fn +".root");
                 Cl_trig.delete_rand_Histos();
 
-                if(applyOfflineCuts){
+                if(applyOfflineCuts && !batch){
                     Cl_trig.setUseMax(false);
                     Cl_trig.ProcessData_OfflineWithThr(self, rand, comp_TotalSum);
                     Cl_trig.printRandPDF(outputDirectory + fn + "_NoMax_Rand.pdf");

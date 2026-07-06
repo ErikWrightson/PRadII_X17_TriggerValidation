@@ -92,6 +92,8 @@ class ClustTrig: public Trigger{
 
         vector<Int_t> excludeMod;
 
+        vector<Int_t> excludeOuterEdge;
+
         Double_t Xedge[35], Yedge[35];
         bool usemax;
         
@@ -296,6 +298,8 @@ class ClustTrig: public Trigger{
         TH1F* h_rand_3Clust_deltaT_VTP[nSSPBits];
         TH1F* h_rand_3Clust_deltaT_Ratio[nSSPBits];
 
+        //randInformation* passed_3Clust;
+
 
         void setup_tSum_Histos();
 
@@ -306,7 +310,8 @@ class ClustTrig: public Trigger{
 
         void fill_rand_Histos_wThr(Int_t i);
 
-        randInformation ComputeTimeBinnedClusters(bool appThr);
+        struct randInformation ComputeTimeBinnedClusters(bool appThr);
+        //void ComputeTimeBinnedClusters(bool appThr);
 
         /*Double_t tSum_LMS_Elligible;
         Double_t tSum_LMS_Found;
