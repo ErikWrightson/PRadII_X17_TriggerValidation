@@ -5,3 +5,6 @@
 *.trg
 *.pdf
 *.xml
+*.root
+*list*
+*.txt
