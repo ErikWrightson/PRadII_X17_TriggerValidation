@@ -2471,7 +2471,7 @@ void ClustTrig::fill_rand_Histos_wThr(Int_t i){
 
     Float_t twoSum = secondMax + cl_E[cl_maxInd[ind_MaxEsum]];
 
-    if(ind_MaxEsum > -1){ //&& twoSum > en/2.0){ The commented coniditon is used when we want to see the efficiency for events that are like our signals.
+    if(ind_MaxEsum > -1){ //&& cl_sums[ind_MaxEsum] > 1900 && twoSum > en/2.0){ //The commented coniditon is used when we want to see the efficiency for events that are like our signals.
         h_rand_3Clust_All_Sum->Fill(cl_sums[ind_MaxEsum]);
         h_rand_3Clust_All_Min->Fill(cl_min[ind_MaxEsum]);
         h_rand_3Clust_All_Max->Fill(cl_max[ind_MaxEsum]);

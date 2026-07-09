@@ -77,8 +77,8 @@ class Trigger{
 
         //Cluster Trigger Thresholds
         static constexpr Float_t CL_SEED_THR = 40.0;//50.0;//60.0; //60 MeV cluster seed threshold
-        static constexpr Float_t CL_IND_THR = 70.0;//80.0;//100.0; //100 MeV individual cluster energy threshold
-        static constexpr Float_t CL_IND_MAX_THR = 1800.0;//MeV individual cluster maximum energy threshold
+        static constexpr Float_t CL_IND_THR = 70.0;//100.0;//80.0;//100.0; //100 MeV individual cluster energy threshold
+        static constexpr Float_t CL_IND_MAX_THR = 1800;//1700.0;//MeV individual cluster maximum energy threshold
         
 
         //Limits for arrays.
