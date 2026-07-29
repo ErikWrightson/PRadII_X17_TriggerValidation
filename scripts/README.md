@@ -53,9 +53,9 @@ This README serves as the central reference for the trigger validation analysis 
 
 Below is a list of a separate README section for each script that can be useed in the analysis workflow of the X17 Clustering trigger analysis versus for the random trigger runs.
 
-1. [Batch Runner Script](#1-1.-batch-trigger-validation-runner)
-2. [Summary Plotting for Merged Validation Histograms](#2-2.-trigger-validation-summary-plotter)
-3. [HyCal XY Trigger Efficiency Analysis and Plotting](#3-3.-hyCal-xY-trigger-efficiency-analysis)
+1. [Batch Runner Script](#1-batch-trigger-validation-runner)
+2. [Summary Plotting for Merged Validation Histograms](#2-trigger-validation-summary-plotter)
+3. [HyCal XY Trigger Efficiency Analysis and Plotting](#3-hyCal-xY-trigger-efficiency-analysis)
 ---
 # 1. Batch Trigger Validation Runner
 
